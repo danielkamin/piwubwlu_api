@@ -1,1 +1,3 @@
-#REST API for Platforma wtnajmu urządzeń badawczych w laboratoriach uczelnianych.
+#REST API for Platforma wynajmu urządzeń badawczych w laboratoriach uczelnianych.
+
+Documentation in the making...
