@@ -82,28 +82,5 @@ exports.getMachineById = async (req, res) => {
   res.send(machine);
 };
 exports.getMachineList = async (req,res)=>{
-  const name = (req.query.q===undefined)?'':(req.query.q)
-  try {
-    let machineList=[];
-    switch(req.query.sort){
-      case 'asc':
-        machineList= await db.Machine.findAll({
-          attributes: ['id', 'name','english_name','imagePath'],order:[['name','ASC']],where:{name:{[Op.iLike]:'%'+name+'%'}}
-        });
-        break;
-      case 'desc':
-        machineList= await db.Machine.findAll({
-          attributes: ['id', 'name','english_name','imagePath'],order:[['name','DESC']],where:{name:{[Op.iLike]:'%'+name+'%'}}
-        });
-        break;
-      default:
-        machineList= await db.Machine.findAll({
-          attributes: ['id', 'name','english_name','imagePath'],where:{name:{[Op.iLike]:'%'+name+'%'}}
-        });
-        break;
-    }
-    res.send(machineList);
-  } catch (err) {
-    res.send(err.sql);
-  }
+  res.send(res.paginatedResults.results);
 }

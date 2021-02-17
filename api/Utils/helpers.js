@@ -14,3 +14,4 @@ exports = validatePassword = async (req,res)=>{
     const hashedPassword = await bcrypt.hash(req.body.password, salt);
     return hashedPassword;
  }
+ 

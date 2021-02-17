@@ -20,4 +20,4 @@ const supervisorCheck = async (employeeId,db,addSuperRole)=>{
             break;
     } 
 }
-module.exports.supervisorCheck
+module.exports = supervisorCheck

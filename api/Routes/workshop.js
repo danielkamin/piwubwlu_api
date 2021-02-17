@@ -1,12 +1,13 @@
 const { verifyAccessToken } = require('../Middlewares/tokenVerify')
 const express = require('express')
+const paginatedSortedResults = require('../Middlewares/pagination')
 const db = require("../../database/models")
 const {authorizeAdmin} = require('../Middlewares/rolesAuthorize')
 const upload = require('../Utils/multerConfig')
 const {createWorkshop,updateWorkshop,removeWorkshop, getAllWorkshop, getWorkshopById, getWorkshopsList} = require('../Controllers/WorkshopController')
 const uploadImage = require('../Middlewares/uploadImage')
 const workshopRouter = express.Router();
-workshopRouter.get('/list', getWorkshopsList);
+workshopRouter.get('/list', paginatedSortedResults(db.Workshop),getWorkshopsList);
 workshopRouter.get('/:id',  getWorkshopById);
 workshopRouter.get('/', verifyAccessToken,  getAllWorkshop);
 workshopRouter.post('/',verifyAccessToken,authorizeAdmin,createWorkshop);

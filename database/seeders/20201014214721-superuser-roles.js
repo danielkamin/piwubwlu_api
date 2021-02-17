@@ -6,7 +6,6 @@ module.exports = {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash('admin123', salt);
     const user = await queryInterface.bulkInsert('Users',[{
-      name:'admin',
       email:'daniel.kaminski1998@gmail.com',
       userType:'ADMIN',      
       password:hashedPassword,

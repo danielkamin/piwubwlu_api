@@ -60,18 +60,18 @@ exports.getAllWorkshop = async (req, res) => {
 exports.updateWorkshop = async (req, res) => {
   const id = req.params.id;
   const workshop = await db.Workshop.findByPk(id);
-  console.log(req.body)
   if (!workshop) return res.status(400).send('Problem occurred with finding that type of workshop');
-  const { error } = WorkshopValidation(req.body);
+  const values = {
+    name: req.body.name,
+    english_name: req.body.english_name,
+    labId: req.body.labId===0?+req.body.labId:null,
+    typeId: req.body.typeId===0?+req.body.typeId:null,
+    room_number: req.body.room_number,
+  }
+  const { error } = WorkshopValidation(values);
   if (error) return res.status(400).send(error.details[0].message);
   try {
-    await db.Workshop.update({
-      name: req.body.name,
-      english_name: req.body.english_name,
-      labId: req.body.labId,
-      typeId: req.body.typeId,
-      room_number: req.body.room_number,
-    },{where:{id:id}});
+    await db.Workshop.update(values,{where:{id:id}});
     // const WS = await db.WorkshopSupervisor.findAll({where:{WorkshopId:id}})
     // WS.forEach(async (ws)=>{
     //   await supervisorCheck(ws.EmployeeId,db,false)
@@ -104,30 +104,7 @@ exports.getWorkshopById = async (req, res) => {
   }
 };
 exports.getWorkshopsList = async (req, res) => {
-  const name = (req.query.q===undefined)?'':(req.query.q)
-  try {
-    let workshopList=[]
-    switch(req.query.sort){
-      case 'asc':
-        workshopList= await db.Workshop.findAll({
-          attributes: ['id', 'name','english_name','imagePath'],order:[['name','ASC']],where:{name:{[Op.iLike]:'%'+name+'%'}}
-        });
-        break;
-      case 'desc':
-        workshopList= await db.Workshop.findAll({
-          attributes: ['id', 'name','english_name','imagePath'],order:[['name','DESC']],where:{name:{[Op.iLike]:'%'+name+'%'}}
-        });
-        break;
-      default:
-        workshopList= await db.Workshop.findAll({
-          attributes: ['id', 'name','english_name','imagePath'],where:{name:{[Op.iLike]:'%'+name+'%'}}
-        });
-        break;
-    }
-    res.send(workshopList);
-  } catch (err) {
-    res.send(err.sql);
-  }
+  res.send(res.paginatedResults.results);
 };
 
 exports.filteredResults = async(req,res)=>{

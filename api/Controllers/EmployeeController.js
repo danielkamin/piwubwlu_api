@@ -6,7 +6,6 @@ const { EmployeeProfileValidation,guestProfileValidation} = require( '../Validat
 exports.updateEmployee= async (req,res)=>{
    let userBody = {firstName:req.body.firstName,lastName:req.body.lastName,email:req.body.email}
    const {id} = req.params;
-
    const {error} = guestProfileValidation(userBody)
    if(error) return res.status(400).send(error.details[0].message)
 
@@ -32,7 +31,8 @@ exports.updateEmployee= async (req,res)=>{
          await db.Employee.destroy({where:{userId:id}});
       }
       else {
-         await db.Employee.update({departmentId:req.body.departmentId},{where:{userId:id}})
+         await db.Employee.update({departmentId:req.body.departmentId===''?null:req.body.departmentId},
+         {where:{userId:id}})
       }
       res.send({ok:true})
    }catch(err)
@@ -42,7 +42,7 @@ exports.updateEmployee= async (req,res)=>{
 }
 exports.getEmployeeList = async(req,res)=>{
    try{
-      const empList = await db.User.findAll({ attributes: ['id', 'firstName','lastName'],include:{model:db.Employee,attributes:['id','departmentId']} });
+      const empList = await db.User.findAll({ attributes: ['id', 'firstName','lastName'],include:{model:db.Employee,attributes:['id','departmentId'],required:true} });
     res.send(empList);
    }catch(err)
    {
@@ -51,8 +51,9 @@ exports.getEmployeeList = async(req,res)=>{
 }
 exports.getEmployeeById = async (req,res)=>{
  try{
-   const employee = await db.Employee.findOne({where:{userId:req.params.id},
-      include:[{model:db.User,required:true,attributes:['firstName','lastName','email']},{model:db.Department}]});
+   // const employee = await db.Employee.findOne({where:{userId:req.params.id},
+   //    include:[{model:db.User,required:true,attributes:['firstName','lastName','email']},{model:db.Department}]});
+   const employee = await db.User.findByPk(req.params.id,{attributes:['firstName','lastName','id','picturePath','email'],include:[{model:db.Employee,required:true,include:db.Department}]})
    res.send(employee)
  }catch(err){
     res.send(err.sql);
@@ -72,11 +73,12 @@ exports.updateEmployeeProfile = async (req,res)=>{
 }
 exports.displayEmployees = async (req,res)=>{
    try{
-      const employees = await db.Employee.findAll({ attributes:['departmentId','id','userId'],
-      include:[
-      {model:db.User,required:true,attributes:['id','firstName','lastName','email','picturePath']},
-      {model:db.Department,attributes:['id','name']}
-   ]}) 
+   //    const employees = await db.Employee.findAll({ attributes:['departmentId','id','userId'],
+   //    include:[
+   //    {model:db.User,required:true,attributes:['id','firstName','lastName','email','picturePath']},
+   //    {model:db.Department,attributes:['id','name']}
+   // ]}) 
+      const employees = await db.User.findAll({attributes:['id','firstName','lastName','picturePath'],include:[{model:db.Employee,required:true,include:db.Department}]},)
    res.send(employees)
    }catch(err)
    {

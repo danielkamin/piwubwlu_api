@@ -2,6 +2,7 @@ const Joi = require('joi');
 
 exports.WorkshopTypeValidation = (data) => {
   const schema = Joi.object({
+    id:Joi.number(),
     name: Joi.string().min(5).required(),
     english_name: Joi.string().min(5),
     symbol: Joi.string().min(1).max(3).required(),
@@ -21,6 +22,7 @@ exports.MachineValidation = (data) => {
 };
 exports.LabValidation = (data) => {
   const schema = Joi.object({
+    id:Joi.number(),
     name: Joi.string().min(4).required(),
     english_name: Joi.string().min(4).required(),
     employeeId:Joi.any()
@@ -32,8 +34,8 @@ exports.WorkshopValidation = (data) => {
     name: Joi.string().min(5).required(),
     english_name: Joi.string().min(5).required(),
     room_number: Joi.string().required(),
-    typeId: Joi.number(),
-    labId: Joi.number().required(),
+    typeId: Joi.any(),
+    labId: Joi.any().required(),
     employees: Joi.array(),
   });
   return schema.validate(data);
@@ -55,6 +57,7 @@ exports.EmployeeProfileValidation = (data)=>{
 }
 exports.DepartmentValidation = (data)=>{
   const schema = Joi.object({
+    id:Joi.number(),
     name: Joi.string().max(40),
     english_name: Joi.string().max(40),
   })
