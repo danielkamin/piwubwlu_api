@@ -17,6 +17,15 @@ module.exports = {
         type: Sequelize.STRING
       },
       title:{
+        type:Sequelize.ARRAY(Sequelize.ENUM('inż.','mgr','dr','prof.','hab.'))
+      },
+      position:{
+        type:Sequelize.STRING
+      },
+      telephone:{
+        type:Sequelize.STRING
+      },
+      room:{
         type:Sequelize.STRING
       },
       createdAt: {

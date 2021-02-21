@@ -15,3 +15,4 @@ exports.WEB_URL_NOPORT = 'http://localhost';
 exports.RentInterval = Object.freeze({
   15:'15',30:'30',45:'45',60:'60'
   })
+exports.EmployeeTitles = Object.freeze({ENGINEER:'inż.',MASTER:'mgr',DOCTOR:'dr',PROFESSOR:'prof.',HABILITATOR:'hab.'})

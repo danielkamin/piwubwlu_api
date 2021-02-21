@@ -17,6 +17,7 @@ module.exports = {
       room_number: {
         type: Sequelize.STRING
       },
+      additionalInfo:{type: Sequelize.STRING(100)},
       typeId:{
         type: Sequelize.INTEGER,
         references: { model: 'WorkshopTypes', key: 'id' },

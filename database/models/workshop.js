@@ -15,7 +15,8 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING,
     english_name: DataTypes.STRING,
     room_number: DataTypes.STRING,
-    imagePath:DataTypes.STRING
+    imagePath:DataTypes.STRING,
+    additionalInfo:DataTypes.STRING(100)
   }, {
     sequelize,
     modelName: 'Workshop',

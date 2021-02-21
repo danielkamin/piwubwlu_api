@@ -82,5 +82,5 @@ exports.getMachineById = async (req, res) => {
   res.send(machine);
 };
 exports.getMachineList = async (req,res)=>{
-  res.send(res.paginatedResults.results);
+  res.send(res.filteredResults);
 }

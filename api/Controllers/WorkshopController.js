@@ -104,13 +104,13 @@ exports.getWorkshopById = async (req, res) => {
   }
 };
 exports.getWorkshopsList = async (req, res) => {
-  res.send(res.paginatedResults.results);
+  res.send(res.filteredResults);
 };
-
-exports.filteredResults = async(req,res)=>{
-  if(req.query.workshop!==''){
-
-  }else{
-    
+exports.getHelperNamesWorkshops = async(req,res)=>{
+  try {
+    const workshops = await db.Workshop.findAll({attributes:['name','id']});
+    res.send(workshops);
+  } catch (err) {
+    res.send(err);
   }
 }

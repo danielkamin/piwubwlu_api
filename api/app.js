@@ -8,7 +8,7 @@ const employeeRouter = require( './Routes/employee')
 const rentalRouter = require( './Routes/reservation')
 const authRouter = require( './Routes/auth')
 const userRouter = require( './Routes/user')
-const assetRouter = require( './Routes/asset')
+const utilsRouter = require( './Routes/utils')
 const guestRouter = require( './Routes/guest')
 const workshopTypeRouter = require( './Routes/workshopType')
 const cron = require( 'node-cron')
@@ -35,7 +35,7 @@ app.use('/api/rental',rentalRouter);
 app.use('/api/employees',employeeRouter);
 app.use('/api/user',userRouter)
 app.use('/api/guests',guestRouter)
-app.use('/api/utils',assetRouter)
+app.use('/api/utils',utilsRouter)
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => {

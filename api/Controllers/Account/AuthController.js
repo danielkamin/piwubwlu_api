@@ -70,7 +70,7 @@ exports.register = async (req, res) => {
   exports.adminLogin = async (req,res)=>{
     const { error } = loginValidation(req.body);
     if (error) return res.status(400).send(error.details[0].message);
-    const user = await db.User.findOne({ where: { name: req.body.email,userType:"ADMIN" } });
+    const user = await db.User.findOne({ where: { email: req.body.email,userType:"ADMIN" } });
     if (!user) return res.status(400).send('Nazwa użytkownika lub hasło są nieprawidłowe');
     validatePassAndResult(req,res,user,false)
   }
