@@ -15,7 +15,8 @@ module.exports = (sequelize, DataTypes) => {
     timeUnit: DataTypes.ENUM('15','30','45','60'),
     maxUnit:DataTypes.INTEGER,
     machineState: DataTypes.BOOLEAN,
-    imagePath:DataTypes.STRING
+    imagePath:DataTypes.STRING,
+    additionalInfo:DataTypes.STRING
   }, {
     sequelize,
     modelName: 'Machine',

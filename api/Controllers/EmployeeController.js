@@ -8,7 +8,6 @@ exports.updateEmployee= async (req,res)=>{
    const {id} = req.params;
    const {error} = guestProfileValidation(userBody)
    if(error) return res.status(400).send(error.details[0].message)
-
    const user = await db.User.findOne({where:{email:req.body.email}})
    if(user!==null && user.id!=req.params.id) return res.status(400).send('Podany e-mail już istnieje')
 
@@ -31,7 +30,11 @@ exports.updateEmployee= async (req,res)=>{
          await db.Employee.destroy({where:{userId:id}});
       }
       else {
-         await db.Employee.update({departmentId:req.body.departmentId===''?null:req.body.departmentId},
+         await db.Employee.update({
+            departmentId:req.body.departmentId===0?null:req.body.departmentId,
+            degreeId:req.body.degreeId===0?null:req.body.degreeId,
+            telephone:req.body.telephone,
+            room:req.body.room},
          {where:{userId:id}})
       }
       res.send({ok:true})
@@ -42,7 +45,8 @@ exports.updateEmployee= async (req,res)=>{
 }
 exports.getEmployeeList = async(req,res)=>{
    try{
-      const empList = await db.User.findAll({ attributes: ['id', 'firstName','lastName'],include:{model:db.Employee,attributes:['id','departmentId'],required:true} });
+      const empList = await db.User.findAll({ attributes: ['id', 'firstName','lastName'],
+      include:{model:db.Employee,attributes:['id','departmentId'],required:true} });
     res.send(empList);
    }catch(err)
    {
@@ -53,7 +57,9 @@ exports.getEmployeeById = async (req,res)=>{
  try{
    // const employee = await db.Employee.findOne({where:{userId:req.params.id},
    //    include:[{model:db.User,required:true,attributes:['firstName','lastName','email']},{model:db.Department}]});
-   const employee = await db.User.findByPk(req.params.id,{attributes:['firstName','lastName','id','picturePath','email'],include:[{model:db.Employee,required:true,include:db.Department}]})
+   const employee = await db.User.findByPk(req.params.id,{attributes:['firstName','lastName','id','picturePath','email'],
+   include:[{model:db.Employee,required:true,
+      include:[{model:db.Department},{model:db.Degree}]}]})
    res.send(employee)
  }catch(err){
     res.send(err.sql);
@@ -63,8 +69,10 @@ exports.updateEmployeeProfile = async (req,res)=>{
    const {error}=EmployeeProfileValidation(req.body.information)
    if(error) return res.status(400).send(error.details[0].message);
    try{
-     await db.Employee.update({information:req.body.information,
-       departmentId:req.body.departmentId
+     await db.Employee.update({
+      information:req.body.information,
+      departmentId:req.body.departmentId,
+      degreeId:req.body.degreeId,
      },{where:{id:req.body.id}})
      res.send({ok:true})
    }catch(err){
@@ -78,7 +86,7 @@ exports.displayEmployees = async (req,res)=>{
    //    {model:db.User,required:true,attributes:['id','firstName','lastName','email','picturePath']},
    //    {model:db.Department,attributes:['id','name']}
    // ]}) 
-      const employees = await db.User.findAll({attributes:['id','firstName','lastName','picturePath'],include:[{model:db.Employee,required:true,include:db.Department}]},)
+      const employees = await db.User.findAll({where:{userType:'GUEST'},attributes:['id','firstName','lastName','picturePath'],include:[{model:db.Employee,required:true,include:[{model:db.Department},{model:db.Degree}]}]},)
    res.send(employees)
    }catch(err)
    {
@@ -88,7 +96,8 @@ exports.displayEmployees = async (req,res)=>{
 exports.getAllEmployee = async (req,res)=>{
    try{
       const empList = await db.User.findAll
-      ({ attributes: ['id', 'firstName','lastName','userType','email'],include:{model:db.Employee,required:true,attributes:['id','departmentId']} });
+      ({ attributes: ['id', 'firstName','lastName','userType','email'],
+      include:{model:db.Employee,required:true,attributes:['id','departmentId','degreeId']} });
       res.send(empList)
    }catch(err)
    {

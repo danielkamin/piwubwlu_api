@@ -2,7 +2,6 @@ const Joi = require('joi');
 
 exports.registerValidation = (data) => {
   const schema = Joi.object({
-    name: Joi.string().min(3).required(),
     email: Joi.string()
       .regex(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/)
       .required()
@@ -63,6 +62,8 @@ exports.guestProfileValidation = (data) => {
       .regex(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/)
       .required()
       .email(),
+    telephone:Joi.string().min(7).max(15),
+    room:Joi.string().min(1).max(5)
   });
   return schema.validate(data);
 };

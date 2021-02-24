@@ -29,9 +29,8 @@ exports.updateGuest = async (req,res) => {
     console.log(req.body)
     const { error } = guestProfileValidation(messageBody);
     if (error) return res.status(400).send(error.details[0].message);
-  
     if(req.body.setEmployee == true) {
-      const emp = await db.Employee.create({userId:guest.userId,information:''})
+      const emp = await db.Employee.create({userId:guest.userId,information:'',telephone:'',room:''})
       await guest.destroy();
       const role = await db.Role.findOne({where:{role_name:roles[2]}})
       await db.UserRole.create({

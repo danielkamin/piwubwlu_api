@@ -38,7 +38,6 @@ exports.register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(req.body.password, salt);
     try {  
       const user = await db.User.create({
-        name: req.body.name,
         email: req.body.email,
         password: hashedPassword,     
         userType:guestTypes.guest,

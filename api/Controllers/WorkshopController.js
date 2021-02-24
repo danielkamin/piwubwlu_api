@@ -8,12 +8,13 @@ Array.prototype.move = function (from,to) {
 }
 
 exports.createWorkshop = async (req, res) => {
-  console.log(req.body.employees)
+  
   const { error } = WorkshopValidation({
     name: req.body.name,
     english_name: req.body.english_name,
     room_number: req.body.room_number,
     labId: req.body.labId,
+    additionalInfo:req.body.additionalInfo,
     typeId: req.body.typeId,
     employees: req.body.employees
   });
@@ -21,7 +22,6 @@ exports.createWorkshop = async (req, res) => {
   try {
     const workshop = await db.Workshop.create(req.body);
     req.body.employees.forEach(async (emp)=>{
-      console.log(emp)
       await db.WorkshopSupervisor.create({
         EmployeeId: emp.employeeId,
         WorkshopId: workshop.id
@@ -59,14 +59,16 @@ exports.getAllWorkshop = async (req, res) => {
 };
 exports.updateWorkshop = async (req, res) => {
   const id = req.params.id;
+  console.log(req.body)
   const workshop = await db.Workshop.findByPk(id);
   if (!workshop) return res.status(400).send('Problem occurred with finding that type of workshop');
   const values = {
     name: req.body.name,
     english_name: req.body.english_name,
-    labId: req.body.labId===0?+req.body.labId:null,
-    typeId: req.body.typeId===0?+req.body.typeId:null,
+    labId: req.body.labId!==0?req.body.labId:null,
+    typeId: req.body.typeId!==0?req.body.typeId:null,
     room_number: req.body.room_number,
+    additionalInfo:req.body.additionalInfo,
   }
   const { error } = WorkshopValidation(values);
   if (error) return res.status(400).send(error.details[0].message);

@@ -10,6 +10,7 @@ const authRouter = require( './Routes/auth')
 const userRouter = require( './Routes/user')
 const utilsRouter = require( './Routes/utils')
 const guestRouter = require( './Routes/guest')
+const degreeRouter = require('./Routes/degree')
 const workshopTypeRouter = require( './Routes/workshopType')
 const cron = require( 'node-cron')
 const {cronSetup} = require( './Utils/emailConfig')
@@ -36,7 +37,7 @@ app.use('/api/employees',employeeRouter);
 app.use('/api/user',userRouter)
 app.use('/api/guests',guestRouter)
 app.use('/api/utils',utilsRouter)
-
+app.use('/api/degrees',degreeRouter)
 const port = process.env.PORT || 5000;
 app.listen(port, () => {
   console.log(`Resource Server is running on port ${port}`);

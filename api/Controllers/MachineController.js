@@ -3,17 +3,19 @@ const {sendMessage,sendMachineSuspendedEmails} = require('../Utils/emailConfig')
 const { MachineValidation } = require('../Validation/resource')
 const Op = db.Sequelize.Op;
 exports.createMachine = async (req, res) => {
-  const { error } = MachineValidation({
+  const values = {
     name: req.body.name,
     english_name: req.body.english_name,
     timeUnit: req.body.timeUnit,
     maxUnit: req.body.maxUnit,
     machineState: req.body.machineState,
+    additionalInfo:req.body.additionalInfo,
     workshopId: req.body.workshopId
-  });
+  }
+  const { error } = MachineValidation(values);
   if (error) return res.status(400).send(error.details[0].message);
   try {
-    const machine = await db.Machine.create(req.body);
+    const machine = await db.Machine.create(values);
     res.send({ id: machine.id });
   } catch (err) {
     res.send(err.sql);
@@ -33,28 +35,21 @@ exports.updateMachine = async (req, res) => {
   const machine = await db.Machine.findByPk(req.params.id);
   if (!machine) return res.status(400).send('Problem occurred while finding this machine');
   console.log(req.body)
-  const { error } = MachineValidation({
+  const values = {
     name: req.body.name,
     english_name: req.body.english_name,
     timeUnit: req.body.timeUnit,
     maxUnit: req.body.maxUnit,
     machineState: req.body.machineState,
+    additionalInfo:req.body.additionalInfo,
     workshopId: req.body.workshopId
-  });
+  }
+  const { error } = MachineValidation(values);
   if (error) return res.status(400).send(error.details[0].message);
   
   try {
     console.log(req.body)
-    await db.Machine.update(
-      {
-        name: req.body.name,
-        english_name: req.body.english_name,
-        timeUnit: req.body.timeUnit,
-        maxUnit: req.body.maxUnit,
-        machineState: req.body.machineState,
-        workshopId: req.body.workshopId
-      },
-      { where: { id: machine.id } }
+    await db.Machine.update(values,{ where: { id: machine.id } }
     );
     if(req.body.machineState===false){
       res.on('finish',async function(){

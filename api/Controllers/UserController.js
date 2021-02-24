@@ -61,20 +61,21 @@ exports.uploadProfilePicture = async (req,res)=>{
  
 }
 exports.updateProfileInfo = async(req,res)=>{
-  console.log(req.user.id)
-  // const { error } = profileValidation(req.body);
-  // if (error) return res.status(400).send(error.details[0].message);
+  console.log(req.body)
   try{
     await db.User.update({
       firstName:req.body.firstName,
       lastName:req.body.lastName,
-      email:req.body.email,
-      name:req.body.name},
+      email:req.body.email,},
       {where:{id:req.user.id}})
     if(req.body.information!==null){ 
       console.log(req.body.information)
-      await db.Employee.update({information:req.body.information},{where:{userId:req.user.id}})}
-    
+      await db.Employee.update({
+        information:req.body.information,
+        telephone:req.body.telephone,
+        room:req.body.room},
+        {where:{userId:req.user.id}})
+      }
       res.send({ok:true})
   }catch(err){
     res.send(err)
