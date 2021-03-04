@@ -6,10 +6,11 @@ const Op = db.Sequelize.Op;
 const {authorizeAdmin} = require('../Middlewares/rolesAuthorize')
 const upload = require('../Utils/multerConfig')
 const {createWorkshop,updateWorkshop,removeWorkshop, getAllWorkshop, 
-    getHelperNamesWorkshops,getWorkshopById, getWorkshopsList} = require('../Controllers/WorkshopController')
+    getHelperNamesWorkshops,getWorkshopById, getWorkshopsList,getWorkshopReservations} = require('../Controllers/WorkshopController')
 const uploadImage = require('../Middlewares/uploadImage')
 const workshopRouter = express.Router();
 workshopRouter.get('/names', getHelperNamesWorkshops);
+workshopRouter.get('/reservations/:id', getWorkshopReservations);
 workshopRouter.get('/list', seachAndSortData(db.Workshop,Op),getWorkshopsList);
 workshopRouter.get('/:id',  getWorkshopById);
 workshopRouter.get('/', verifyAccessToken,  getAllWorkshop);

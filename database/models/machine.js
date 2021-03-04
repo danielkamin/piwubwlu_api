@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
   class Machine extends Model {
     static associate(models) {
       Machine.belongsTo(models.Workshop,{foreignKey:'workshopId'})
-      Machine.hasOne(models.Reservation,{foreignKey:'machineId'});
+      Machine.hasMany(models.Reservation,{foreignKey:'machineId'});
     }
   };
   Machine.init({

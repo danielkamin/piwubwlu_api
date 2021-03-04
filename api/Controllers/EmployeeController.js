@@ -86,7 +86,8 @@ exports.displayEmployees = async (req,res)=>{
    //    {model:db.User,required:true,attributes:['id','firstName','lastName','email','picturePath']},
    //    {model:db.Department,attributes:['id','name']}
    // ]}) 
-      const employees = await db.User.findAll({where:{userType:'GUEST'},attributes:['id','firstName','lastName','picturePath'],include:[{model:db.Employee,required:true,include:[{model:db.Department},{model:db.Degree}]}]},)
+      const employees = await db.User.findAll({where:{userType:'GUEST'},attributes:['id','firstName','lastName','picturePath','userType'],include:[{model:db.Employee,required:true,include:[{model:db.Department},{model:db.Degree}]}]},)
+      console.log(employees)
    res.send(employees)
    }catch(err)
    {

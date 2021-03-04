@@ -59,10 +59,18 @@ exports.searchAllData = async (req,res)=>{
     ]},
     })
     let resources = [];
-    resources.push(employees)
-    resources.push(machines)
-    resources.push(workshops)
-    resources.push(labs)
+    resources=employees.map(emp=>{
+      return {id:emp.id,name:emp.firstName,secondName:emp.lastName}
+    })
+    resources.push(...machines.map(item=>{
+      return {id:item.id,name:item.name,secondName:item.english_name}
+    }))
+    resources.push(...workshops.map(item=>{
+      return {id:item.id,name:item.name,secondName:item.english_name}
+    }))
+    resources.push(...labs.map(item=>{
+      return {id:item.id,name:item.name,secondName:item.english_name}
+    }))
     res.send(resources)
   }catch(err){
     res.send(err)

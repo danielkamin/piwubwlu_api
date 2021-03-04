@@ -116,3 +116,12 @@ exports.getHelperNamesWorkshops = async(req,res)=>{
     res.send(err);
   }
 }
+exports.getWorkshopReservations = async (req,res)=>{
+  const id = req.params.id;
+  try{
+    const resourcesWithEvents = await db.Machine.findAll({where:{workshopId:id},include:{model:db.Reservation}})
+    res.send(resourcesWithEvents)
+  }catch(err){
+    res.send(err)
+  }
+}
