@@ -23,7 +23,7 @@ module.exports = {
       machineState:{
         type: Sequelize.BOOLEAN
       },
-      additionalInfo:{type: Sequelize.STRING},
+      additionalInfo:{type: Sequelize.TEXT},
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

@@ -6,7 +6,7 @@ exports.getImagesPath = async (req,res)=>{
     res.send({logoPath:WEB_URL_NOPORT+':5000/uploads/LogoPB.png',bgPath:WEB_URL_NOPORT+':5000/uploads/background.jpg'})
 }
 exports.verifyCaptcha = async(req,res)=>{
-    const user = await db.User.findByPk(req.body.userId,{attributes:['email']})
+    const user = await db.User.findByPk(req.body.userId,{attributes:['email'],include:{model:db.Employee,attributes:['telephone']}})
     if (!req.body.captcha)
       return res.send({ ok: false, msg: 'Please select captcha' });
   
@@ -17,7 +17,7 @@ exports.verifyCaptcha = async(req,res)=>{
       if (body.success !== undefined && !body.success)
         return res.send({ ok: false, msg: 'Failed captcha verification' });
     
-      return res.send({ ok: true, msg: 'Captcha passed',email:user.email });
+      return res.send({ ok: true, msg: 'Captcha passed',email:user.email,telephone:user.telephone });
     }catch(err){
       res.send(err)
     }

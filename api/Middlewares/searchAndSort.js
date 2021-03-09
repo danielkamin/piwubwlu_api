@@ -7,6 +7,8 @@ module.exports = function seachAndSortData(model,Op){
     let results = []
     return async (req,res,next)=>{
         const name = (req.query.q===undefined)?'':(req.query.q)
+        console.log(name)
+        console.log(req.query.sort)
         switch(req.query.sort){
             case 'asc':
                 results= await model.findAll({

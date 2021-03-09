@@ -17,7 +17,7 @@ exports.MachineValidation = (data) => {
     maxUnit:Joi.number().min(1).max(20).required(),
     machineState: Joi.boolean().required(),
     workshopId: Joi.number().required(),
-    additionalInfo:Joi.string().max(200)
+    additionalInfo:Joi.string().max(450)
   });
   return schema.validate(data);
 };
@@ -38,7 +38,7 @@ exports.WorkshopValidation = (data) => {
     typeId: Joi.any(),
     labId: Joi.any().required(),
     employees: Joi.array(),
-    additionalInfo:Joi.string().max(200)
+    additionalInfo:Joi.string().max(450)
   });
   return schema.validate(data);
 };

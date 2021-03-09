@@ -57,7 +57,7 @@ exports.getEmployeeById = async (req,res)=>{
  try{
    // const employee = await db.Employee.findOne({where:{userId:req.params.id},
    //    include:[{model:db.User,required:true,attributes:['firstName','lastName','email']},{model:db.Department}]});
-   const employee = await db.User.findByPk(req.params.id,{attributes:['firstName','lastName','id','picturePath','email'],
+   const employee = await db.User.findByPk(req.params.id,{attributes:['firstName','lastName','id','picturePath',],
    include:[{model:db.Employee,required:true,
       include:[{model:db.Department},{model:db.Degree}]}]})
    res.send(employee)
@@ -87,7 +87,6 @@ exports.displayEmployees = async (req,res)=>{
    //    {model:db.Department,attributes:['id','name']}
    // ]}) 
       const employees = await db.User.findAll({where:{userType:'GUEST'},attributes:['id','firstName','lastName','picturePath','userType'],include:[{model:db.Employee,required:true,include:[{model:db.Department},{model:db.Degree}]}]},)
-      console.log(employees)
    res.send(employees)
    }catch(err)
    {
