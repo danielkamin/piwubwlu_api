@@ -97,7 +97,7 @@ exports.getTimeReservation = async (req, res) => {
 //get by machine
 exports.getMachineReservation = async (req, res) => {
   try {
-    const reservations = await db.Reservation.findAll({where:{machineId:req.params.id,state:ReservationTypes.ACCEPTED},include:{model:db.Employee,include:db.User}})
+    const reservations = await db.Reservation.findAll({where:{machineId:req.params.id},include:{model:db.Employee,include:db.User}})
     res.send(reservations)
   } catch (err) {
     res.send(err.sql);

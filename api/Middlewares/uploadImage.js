@@ -3,10 +3,8 @@ const fs =require('fs')
 
 const unlinkAsync = promisify(fs.unlink)
 
-module.exports = function uploadImage (model){
+function uploadImage(model){
     return async (req,res,next)=>{
-        console.log(req.file)
-        console.log(req.body.id)
         const tempModel = await model.findByPk(req.body.id)
           if(tempModel.imagePath !== null){
             await unlinkAsync(tempModel.imagePath)
@@ -15,3 +13,16 @@ module.exports = function uploadImage (model){
           res.send({ok:true})
     }  
   }
+function deleteImage(model){
+  return async (req,res,next)=>{
+    const tempModel = await model.findByPk(req.body.id)
+      if(tempModel.imagePath !== null){
+        await unlinkAsync(tempModel.imagePath)
+      }
+      await model.update({imagePath:null},{where:{id:tempModel.id}})
+      res.send({ok:true})
+}  
+}
+module.exports = {
+  uploadImage,deleteImage
+}

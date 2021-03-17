@@ -8,13 +8,13 @@ Array.prototype.move = function (from,to) {
 }
 
 exports.createWorkshop = async (req, res) => {
-  
+  console.log(req.body)
   const { error } = WorkshopValidation({
     name: req.body.name,
     english_name: req.body.english_name,
     room_number: req.body.room_number,
     labId: req.body.labId,
-    additionalInfo:req.body.additionalInfo,
+    additionalInfo:req.body.additionalInfo?req.body.additionalInfo:"",
     typeId: req.body.typeId,
     employees: req.body.employees
   });

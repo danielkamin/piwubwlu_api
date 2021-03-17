@@ -1,4 +1,5 @@
 const db = require('../../database/models')
+const _ = require("lodash");
 const {sendMessage,sendMachineSuspendedEmails} = require('../Utils/emailConfig')
 const { MachineValidation } = require('../Validation/resource')
 const Op = db.Sequelize.Op;
@@ -76,6 +77,19 @@ exports.getMachineById = async (req, res) => {
   if (!machine) return res.status(404).send('Machine was not found');
   res.send(machine);
 };
+exports.getMachineSupervisors = async (req,res)=>{
+  const supervisors = await db.Machine.findByPk(req.params.id,
+    {include:{model:db.Workshop,
+      include:[{model:db.Employee,include:{model:db.User,attributes:['firstName','lastName','id']}},
+      {model:db.Lab,include:{model:db.Employee,include:{model:db.User,attributes:['firstName','lastName','id']}}}]}});
+  const tempUsers = [];
+  tempUsers.push(supervisors.Workshop.Lab.Employee.User)
+  supervisors.Workshop.Employees.forEach((emp)=>{
+    tempUsers.push(emp.User)
+  })
+  let users = _.uniqBy(tempUsers,'id')
+  res.send(users)
+}
 exports.getMachineList = async (req,res)=>{
   res.send(res.filteredResults);
 }

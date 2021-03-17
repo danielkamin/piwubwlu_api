@@ -57,7 +57,7 @@ exports.getEmployeeById = async (req,res)=>{
  try{
    // const employee = await db.Employee.findOne({where:{userId:req.params.id},
    //    include:[{model:db.User,required:true,attributes:['firstName','lastName','email']},{model:db.Department}]});
-   const employee = await db.User.findByPk(req.params.id,{attributes:['firstName','lastName','id','picturePath',],
+   const employee = await db.User.findByPk(req.params.id,{attributes:['firstName','lastName','id','picturePath','email'],
    include:[{model:db.Employee,required:true,
       include:[{model:db.Department},{model:db.Degree}]}]})
    res.send(employee)

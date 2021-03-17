@@ -11,20 +11,22 @@ const userRouter = require( './Routes/user')
 const utilsRouter = require( './Routes/utils')
 const guestRouter = require( './Routes/guest')
 const degreeRouter = require('./Routes/degree')
+const CASRouter = require('./Routes/cas')
 const workshopTypeRouter = require( './Routes/workshopType')
 const cron = require( 'node-cron')
 const {cronSetup} = require( './Utils/emailConfig')
 const {dbConnect} = require( './Config/dbConnect')
 const {configExpress} = require( './Config/config')
+const session = require('express-session');
+
 dbConnect(db.sequelize);
 const app = express();
-configExpress(app,express);
+configExpress(app,express,session);
+
 cronSetup(cron,db);
-
-app.get('/',function(req,res){
-  res.send('Hello World')
+app.get('/',function(req,res) {
+  res.send('Hello from Platforma Wynajmu Urządzeń Laboratoryjnych API');
 })
-
 app.use('/uploads',express.static('uploads'));
 app.use('/auth', authRouter);
 app.use('/api/departments',departmentRouter);
@@ -38,6 +40,7 @@ app.use('/api/user',userRouter)
 app.use('/api/guests',guestRouter)
 app.use('/api/utils',utilsRouter)
 app.use('/api/degrees',degreeRouter)
+app.use('/api/cas',CASRouter)
 const port = process.env.PORT || 5000;
 app.listen(port, () => {
   console.log(`Resource Server is running on port ${port}`);

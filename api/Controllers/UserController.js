@@ -42,7 +42,7 @@ exports.changePassword = async (req, res) => {
 exports.getProfileInfo =async(req,res)=>{
   try{
     console.log(req.user)
-    const user = await db.User.findOne({where:{id:req.user.id},include:db.Employee})
+    const user = await db.User.findOne({where:{id:req.user.id},include:{model:db.Employee,include:db.Degree}})
     return res.send(user)
   }catch(err)
   {
@@ -61,19 +61,18 @@ exports.uploadProfilePicture = async (req,res)=>{
  
 }
 exports.updateProfileInfo = async(req,res)=>{
-  console.log(req.body)
   try{
     await db.User.update({
       firstName:req.body.firstName,
       lastName:req.body.lastName,
       email:req.body.email,},
       {where:{id:req.user.id}})
-    if(req.body.information!==null){ 
-      console.log(req.body.information)
+    if(req.body.employee){ 
       await db.Employee.update({
         information:req.body.information,
         telephone:req.body.telephone,
-        room:req.body.room},
+        room:req.body.room,
+      degreeId:req.body.degreeId},
         {where:{userId:req.user.id}})
       }
       res.send({ok:true})

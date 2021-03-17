@@ -1,6 +1,7 @@
 const db = require('../../database/models')
 const Op = db.Sequelize.Op
 const fetch = require('node-fetch')
+const CASUrl = 'https://idm.uci.pb.edu.pl/cas'
 const {WEB_URL_NOPORT,WEB_URL} = require('../Utils/constants')
 exports.getImagesPath = async (req,res)=>{
     res.send({logoPath:WEB_URL_NOPORT+':5000/uploads/LogoPB.png',bgPath:WEB_URL_NOPORT+':5000/uploads/background.jpg'})
@@ -59,19 +60,37 @@ exports.searchAllData = async (req,res)=>{
     ]},
     })
     let resources = [];
-    resources=employees.map(emp=>{
+    resources.push(employees.map(emp=>{
       return {id:emp.id,name:emp.firstName,secondName:emp.lastName}
-    })
-    resources.push(...machines.map(item=>{
+    }))
+    resources.push(machines.map(item=>{
       return {id:item.id,name:item.name,secondName:item.english_name}
     }))
-    resources.push(...workshops.map(item=>{
+    resources.push(workshops.map(item=>{
       return {id:item.id,name:item.name,secondName:item.english_name}
     }))
-    resources.push(...labs.map(item=>{
+    resources.push(labs.map(item=>{
       return {id:item.id,name:item.name,secondName:item.english_name}
     }))
     res.send(resources)
+  }catch(err){
+    res.send(err)
+  }
+}
+
+exports.CASLogin = async (req,res)=>{
+  
+}
+exports.CASVerify= async (req,res)=>{
+
+}
+
+exports.fetchAllNames = async (req,res)=>{
+  try{
+    const names = await db.Lab.findAll({attributes:['id','name'],include:
+      {model:db.Workshop,include:
+        {model:db.Machine,required:true,attributes:['id','name']},required:true,attributes:['id','name']}})
+    res.send(names);
   }catch(err){
     res.send(err)
   }
