@@ -16,7 +16,9 @@ module.exports = (sequelize, DataTypes) => {
   };
   Lab.init({
     name: DataTypes.STRING,
-    english_name: DataTypes.STRING
+    english_name: DataTypes.STRING,
+    imagePath:DataTypes.STRING,
+    additionalInfo:DataTypes.STRING
   }, {
     sequelize,
     modelName: 'Lab',

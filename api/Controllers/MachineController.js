@@ -49,7 +49,6 @@ exports.updateMachine = async (req, res) => {
   if (error) return res.status(400).send(error.details[0].message);
   
   try {
-    console.log(req.body)
     await db.Machine.update(values,{ where: { id: machine.id } }
     );
     if(req.body.machineState===false){
@@ -83,8 +82,8 @@ exports.getMachineSupervisors = async (req,res)=>{
       include:[{model:db.Employee,include:{model:db.User,attributes:['firstName','lastName','id']}},
       {model:db.Lab,include:{model:db.Employee,include:{model:db.User,attributes:['firstName','lastName','id']}}}]}});
   const tempUsers = [];
-  tempUsers.push(supervisors.Workshop.Lab.Employee.User)
-  supervisors.Workshop.Employees.forEach((emp)=>{
+  supervisors.Workshop.Lab.Employee && tempUsers.push(supervisors.Workshop.Lab.Employee.User)
+  supervisors.Workshop.Employees && supervisors.Workshop.Employees.forEach((emp)=>{
     tempUsers.push(emp.User)
   })
   let users = _.uniqBy(tempUsers,'id')

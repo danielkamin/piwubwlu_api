@@ -19,6 +19,12 @@ module.exports = {
         references: { model: 'Employees', key: 'id' },
         onDelete:'SET NULL'
       },
+      additionalInfo:{
+        type: Sequelize.TEXT
+      },
+      imagePath:{
+        type: Sequelize.STRING
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

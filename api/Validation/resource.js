@@ -26,7 +26,8 @@ exports.LabValidation = (data) => {
     id:Joi.number(),
     name: Joi.string().min(4).required(),
     english_name: Joi.string().min(4).required(),
-    employeeId:Joi.any()
+    employeeId:Joi.any(),
+    additionalInfo:Joi.string().max(600).allow(null, '')
   });
   return schema.validate(data);
 };

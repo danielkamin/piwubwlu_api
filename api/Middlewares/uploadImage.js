@@ -6,6 +6,7 @@ const unlinkAsync = promisify(fs.unlink)
 function uploadImage(model){
     return async (req,res,next)=>{
         const tempModel = await model.findByPk(req.body.id)
+        console.log(req.body.id)
           if(tempModel.imagePath !== null){
             await unlinkAsync(tempModel.imagePath)
           }

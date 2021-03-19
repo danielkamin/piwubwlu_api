@@ -9,10 +9,11 @@ exports.createLab = async (req, res) => {
     const lab = await db.Lab.create({
       name: req.body.name,
       english_name: req.body.english_name,
-      employeeId:empId
+      employeeId:empId,
+      additionalInfo:req.body.additionalInfo,
     });
     if(empId!==null)res.on('finish',function(){supervisorCheck(req.body.employeeId,db,true)})
-    res.send({ ok: true });
+    res.send({ id: lab.id });
   } catch (err) {
     res.send(err);
   }
@@ -21,7 +22,8 @@ exports.updateLab = async (req, res) => {
 
   const { error } = LabValidation({
     name: req.body.name,
-    english_name: req.body.english_name
+    english_name: req.body.english_name,
+    additionalInfo:req.body.additionalInfo
   });
   if (error) return res.status(400).send(error.details[0].message);
 
@@ -30,11 +32,12 @@ exports.updateLab = async (req, res) => {
     await db.Lab.update({
       name: req.body.name,
       english_name: req.body.english_name,
-      employeeId:empId
+      employeeId:empId,
+      additionalInfo:req.body.additionalInfo
     },{ where: { id: req.params.id } }
     );
     if(empId!==null)res.on('finish',function(){supervisorCheck(req.body.employeeId,db,true)})
-    res.send({ ok: true });
+    res.send({ id: req.params.id  });
   } catch (err) {
     res.send(err.sql);
   }
@@ -68,7 +71,7 @@ exports.getLabById = async (req, res) => {
 };
 exports.getLabList = async (req, res) => {
   try {
-    const labList = await db.Lab.findAll({ attributes: ['id', 'name','employeeId','english_name'] });
+    const labList = await db.Lab.findAll({ attributes: ['id', 'name','employeeId','english_name','imagePath'] });
     res.send(labList);
   } catch (err) {
     res.send(err.sql);
