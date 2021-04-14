@@ -9,10 +9,10 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       name: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(60)
       },
       english_name: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(60)
       },
       maxUnit: {
         type: Sequelize.INTEGER
@@ -23,7 +23,9 @@ module.exports = {
       machineState:{
         type: Sequelize.BOOLEAN
       },
-      additionalInfo:{type: Sequelize.TEXT},
+      additionalInfo:{
+        type: Sequelize.TEXT
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

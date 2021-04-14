@@ -9,10 +9,10 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       name: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(60)
       },
       english_name: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(60)
       },
       employeeId:{
         type: Sequelize.INTEGER,
@@ -20,7 +20,7 @@ module.exports = {
         onDelete:'SET NULL'
       },
       additionalInfo:{
-        type: Sequelize.TEXT
+        type: Sequelize.JSONB
       },
       imagePath:{
         type: Sequelize.STRING

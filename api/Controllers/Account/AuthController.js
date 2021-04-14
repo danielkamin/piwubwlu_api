@@ -23,8 +23,9 @@ const validatePassAndResult = async (req,res,user,isAdmin)=>{
     let user_roles = rolesDb.map((role) => {
       if (temp_roles_id.includes(role.id)) return role.role_name;
     });
-    sendRefreshToken(res, createRefreshToken(user, user_roles),isAdmin);
-    res.send({ accessToken: createAccessToken(user.dataValues, user_roles) });
+    let userName =user.firstName + ' ' + user.lastName;
+    sendRefreshToken(res, createRefreshToken(user, user_roles,userName),isAdmin);
+    res.send({ accessToken: createAccessToken(user.dataValues, user_roles,userName) });
   }
 exports.register = async (req, res) => {
     const { error } = registerValidation(req.body);

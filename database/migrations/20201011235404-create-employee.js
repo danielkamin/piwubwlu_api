@@ -14,16 +14,16 @@ module.exports = {
         onDelete:'SET NULL'
       },
       information: {
-        type: Sequelize.STRING
+        type: Sequelize.TEXT
       },
       position:{
-        type:Sequelize.STRING
+        type:Sequelize.STRING(20)
       },
       telephone:{
-        type:Sequelize.STRING
+        type:Sequelize.STRING(15)
       },
       room:{
-        type:Sequelize.STRING
+        type:Sequelize.STRING(15)
       },
       createdAt: {
         allowNull: false,

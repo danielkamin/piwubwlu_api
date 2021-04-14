@@ -1,5 +1,7 @@
 const express = require( 'express');
 const db = require( '../database/models/index')
+const https = require('https');
+const fs = require('fs');
 const labRouter = require( './Routes/lab')
 const machineRouter = require( './Routes/machine')
 const workshopRouter = require( './Routes/workshop')
@@ -23,10 +25,19 @@ dbConnect(db.sequelize);
 const app = express();
 configExpress(app,express,session);
 
+//ssl setup
+const options = {
+  key: fs.readFileSync('./certs/localhost-key.pem'), // Replace with the path to your key
+  cert: fs.readFileSync('./certs/localhost.pem') // Replace with the path to your certificate
+}
+
 cronSetup(cron,db);
 app.get('/',function(req,res) {
   res.send('Hello from Platforma Wynajmu Urządzeń Laboratoryjnych API');
 })
+
+
+//routes
 app.use('/uploads',express.static('uploads'));
 app.use('/auth', authRouter);
 app.use('/api/departments',departmentRouter);
@@ -41,7 +52,12 @@ app.use('/api/guests',guestRouter)
 app.use('/api/utils',utilsRouter)
 app.use('/api/degrees',degreeRouter)
 app.use('/api/cas',CASRouter)
+
+
+
 const port = process.env.PORT || 5000;
-app.listen(port, () => {
-  console.log(`Resource Server is running on port ${port}`);
+
+
+https.createServer(options, app).listen(port,() => {
+  console.log('Server listening on port ' + port);
 });

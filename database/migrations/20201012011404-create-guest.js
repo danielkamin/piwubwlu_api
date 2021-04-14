@@ -7,9 +7,7 @@ module.exports = {
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
-      },
-     
-      
+      },  
       isVerified: {
         type: Sequelize.BOOLEAN
       },

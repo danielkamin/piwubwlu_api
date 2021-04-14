@@ -152,7 +152,6 @@ exports.updateSupervisedState = async (req,res)=>{
   try
     {if(req.body.accept===true){
       await reservation.update({state:ReservationTypes.ACCEPTED});
-      //wiadomość maila
       sendMessage(employee.User.email,'Akceptacja Rezerwacji',`Rezerwacja na maszynę: ${reservation.Machine.name} została zaakceptowana`)
       res.send({ok:true})
     }else{

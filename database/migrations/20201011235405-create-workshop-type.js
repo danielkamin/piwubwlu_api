@@ -9,13 +9,13 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       name: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(60)
       },
       english_name: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(60)
       },
       symbol: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(5)
       },
       createdAt: {
         allowNull: false,

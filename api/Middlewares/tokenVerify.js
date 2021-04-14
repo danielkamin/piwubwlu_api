@@ -35,16 +35,18 @@ const verifyAdminRefreshToken = async(req,res)=>{
 const verify = async (verified,token,res,isAdmin)=>{
   try {
     verified = jwt.verify(token, process.env.REFRESH_TOKEN);
+    console.log(verified)
   } catch (err) {
     console.log(err);
     return res.status(401).send({ ok: false, accessToken: '' });
   }
-  sendRefreshToken(res, createRefreshToken(verified, verified.role),isAdmin);
+  sendRefreshToken(res, createRefreshToken(verified, verified.role,verified.userName),isAdmin);
   return res.send({
     ok: true,
-    accessToken: createAccessToken(verified, verified.role),
+    accessToken: createAccessToken(verified, verified.role,verified.userName),
   });
 }
+
 const verifyResetToken = async (req, res, next) => {
   const token = req.params.token;
   if (!token) return res.status(403).send({ ok: false});

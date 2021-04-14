@@ -9,7 +9,7 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       role_name: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(20)
       },
       createdAt: {
         allowNull: false,

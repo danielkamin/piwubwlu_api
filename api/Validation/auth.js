@@ -1,18 +1,18 @@
 const Joi = require('joi');
+const { max } = require('lodash');
 
 exports.registerValidation = (data) => {
   const schema = Joi.object({
     email: Joi.string()
       .regex(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/)
       .required()
-      .email(),
-      firstName:Joi.string().min(3),
-      lastName:Joi.string().min(2),
+      .email().max(50),
+      firstName:Joi.string().min(3).max(15),
+      lastName:Joi.string().min(2).max(50),
     password: Joi.string()
       .regex(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/)
       .required()
-      .strict(),
-    
+      .strict().max(20),
     repeatPassword: Joi.string().valid(Joi.ref('password')).required().strict(),
     acceptRegulations:Joi.boolean().invalid(false)
   });
@@ -24,7 +24,7 @@ exports.loginValidation = (data) => {
       .regex(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/)
       .required()
       .email(),
-    password: Joi.string().required(),
+    password: Joi.string().required()
   });
   return schema.validate(data);
 };
@@ -40,7 +40,7 @@ exports.emailValidation = (data) => {
     email: Joi.string()
       .regex(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/)
       .required()
-      .email(),
+      .email().max(50),
   });
   return schema.validate(data);
 };
@@ -49,34 +49,33 @@ exports.newPasswordValidation = (data) => {
     password: Joi.string()
       .regex(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/)
       .required()
-      .strict(),
+      .strict().max(20),
     repeatPassword: Joi.string().valid(Joi.ref('password')).required().strict(),
   });
   return schema.validate(data);
 };
 exports.guestProfileValidation = (data) => {
   const schema = Joi.object({
-    firstName: Joi.string().min(3).required(),
-    lastName: Joi.string().min(3).required(),
+    firstName: Joi.string().min(3).max(50).required(),
+    lastName: Joi.string().min(3).max(15).required(),
     email: Joi.string()
       .regex(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/)
       .required()
-      .email(),
+      .email().max(50),
     telephone:Joi.string().min(7).max(15),
-    room:Joi.string().min(1).max(5)
+    room:Joi.string().min(1).max(15)
   });
   return schema.validate(data);
 };
 exports.profileValidation = (data) => {
   const schema = Joi.object({
-    firstName: Joi.string().min(3).required(),
-    lastName: Joi.string().min(3).required(),
-    name: Joi.string().min(3).optional().allow(""),
-    information: Joi.string().optional().allow("",null).max(200),
+    firstName: Joi.string().min(3).required().max(15),
+    lastName: Joi.string().min(3).required().max(50),
+    information: Joi.string().optional().allow("",null).max(600),
     email: Joi.string()
       .regex(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/)
       .required()
-      .email(),
+      .email().max(50),
   });
   return schema.validate(data);
 };

@@ -9,18 +9,18 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       email: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(50)
       },
       password: {
         type: Sequelize.STRING
       },
       firstName: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(15)
       },
       lastName: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(50)
       },
-           userType: {
+      userType: {
         type: Sequelize.STRING
       },
       createdAt: {

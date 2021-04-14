@@ -9,15 +9,17 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       name: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(60)
       },
       english_name: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(60)
       },
       room_number: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(15)
       },
-      additionalInfo:{type:Sequelize.TEXT},
+      additionalInfo:{
+        type:Sequelize.TEXT
+      },
       typeId:{
         type: Sequelize.INTEGER,
         references: { model: 'WorkshopTypes', key: 'id' },

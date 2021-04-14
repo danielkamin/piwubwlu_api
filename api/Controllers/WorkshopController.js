@@ -21,29 +21,38 @@ exports.createWorkshop = async (req, res) => {
   if (error) return res.status(400).send(error.details[0].message);
   try {
     const workshop = await db.Workshop.create(req.body);
-    req.body.employees.forEach(async (emp)=>{
-      await db.WorkshopSupervisor.create({
-        EmployeeId: emp.employeeId,
-        WorkshopId: workshop.id
-      });
-      supervisorCheck(emp.employeeId,db,true)
+    let supervisorEmployees = req.body.employees;
+    res.on('finish',function () {
+      supervisorEmployees.forEach(async (emp)=>{
+        await db.WorkshopSupervisor.create({
+          EmployeeId: emp.employeeId,
+          WorkshopId: workshop.id
+        });
+        supervisorCheck(emp.employeeId,db,true)
+      })
     })
-    // sprawdzanie roli supervisora z możliwością na res.on('finish',()=>{})
     res.send({ id: workshop.id });
   } catch (err) {
     res.send(err.sql);
   }
 };
 exports.removeWorkshop = async (req, res) => {
-  const workshop = await db.Workshop.findByPk(req.params.id,{include:db.Employee});
-  console.log(workshop)
+  const id = req.params.id;
+  const workshop = await db.Workshop.findByPk(req.params.id,{
+    include:db.Employee
+  });
   if (!workshop) return res.status(400).send('Problem occurred with finding that type of workshop');
   try {
-    await db.Workshop.destroy({
-      where: { id: req.params.id }
-    });
-    if(workshop.Employees[0].id!==undefined)
-      res.on('finish',function(){supervisorCheck(workshop.Employees[0].id,db,false)})
+    let workshopSupervisors = workshop.Employees.length > 0 ? workshop.Employees : null;
+    await db.Workshop.destroy({where:{
+      id:id
+    }});
+    if(workshopSupervisors)
+      res.on('finish',function () {
+        workshopSupervisors.forEach(async (emp)=>{
+          supervisorCheck(emp.id,db,false)
+        })
+      })
     res.send({ok:true});
   } catch (err) {
     res.send(err);
@@ -59,7 +68,6 @@ exports.getAllWorkshop = async (req, res) => {
 };
 exports.updateWorkshop = async (req, res) => {
   const id = req.params.id;
-  console.log(req.body)
   const workshop = await db.Workshop.findByPk(id);
   if (!workshop) return res.status(400).send('Problem occurred with finding that type of workshop');
   const values = {
@@ -74,16 +82,23 @@ exports.updateWorkshop = async (req, res) => {
   if (error) return res.status(400).send(error.details[0].message);
   try {
     await db.Workshop.update(values,{where:{id:id}});
-    // const WS = await db.WorkshopSupervisor.findAll({where:{WorkshopId:id}})
-    // WS.forEach(async (ws)=>{
-    //   await supervisorCheck(ws.EmployeeId,db,false)
-    // })
+    const oldWorkshopSupervisors = await db.WorkshopSupervisor.findAll({where:{WorkshopId:id}});
+
     await db.WorkshopSupervisor.destroy({where:{WorkshopId:id}})  
-    req.body.employees.forEach(async (item)=>{
-      await db.WorkshopSupervisor.create({WorkshopId:id,EmployeeId:item.employeeId})
-      supervisorCheck(item.employeeId,db,true)
+    oldWorkshopSupervisors.forEach(oldWorkshopSupervisor=>{
+      supervisorCheck(oldWorkshopSupervisor.EmployeeId,db,false)
     })
-    // sprawdzanie roli supervisora z możliwością na res.on('finish',()=>{})
+
+    let supervisorEmployees = req.body.employees;
+    res.on('finish',function () {
+      supervisorEmployees.forEach(async (emp)=>{
+        await db.WorkshopSupervisor.create({
+          EmployeeId: emp.employeeId,
+          WorkshopId: id
+        });
+        await supervisorCheck(emp.employeeId,db,true)
+      })
+    })
     res.send({ id: id });
   } catch (err) {
     res.send(err.sql);
