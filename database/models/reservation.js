@@ -8,6 +8,7 @@ module.exports = (sequelize, DataTypes) => {
       Reservation.belongsTo(models.Machine,{foreignKey:'machineId'})
       Reservation.belongsTo(models.Employee,{foreignKey:'employeeId'})
       Reservation.hasOne(models.ReservationSurvey,{foreignKey:'reservationId',onDelete:'CASCADE'})
+      Reservation.hasOne(models.ReservationDeclineComment,{foreignKey:'reservationId',onDelete:'CASCADE'})
     }
   };
   Reservation.init({

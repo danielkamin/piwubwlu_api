@@ -1,5 +1,4 @@
 const Joi = require('joi');
-const { max } = require('lodash');
 
 exports.registerValidation = (data) => {
   const schema = Joi.object({
@@ -71,7 +70,7 @@ exports.profileValidation = (data) => {
   const schema = Joi.object({
     firstName: Joi.string().min(3).required().max(15),
     lastName: Joi.string().min(3).required().max(50),
-    information: Joi.string().optional().allow("",null).max(600),
+    information: Joi.any(),
     email: Joi.string()
       .regex(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/)
       .required()

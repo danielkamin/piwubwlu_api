@@ -8,13 +8,12 @@ Array.prototype.move = function (from,to) {
 }
 
 exports.createWorkshop = async (req, res) => {
-  console.log(req.body)
   const { error } = WorkshopValidation({
     name: req.body.name,
     english_name: req.body.english_name,
     room_number: req.body.room_number,
     labId: req.body.labId,
-    additionalInfo:req.body.additionalInfo?req.body.additionalInfo:"",
+    additionalInfo:req.body.additionalInfo,
     typeId: req.body.typeId,
     employees: req.body.employees
   });
@@ -134,7 +133,7 @@ exports.getHelperNamesWorkshops = async(req,res)=>{
 exports.getWorkshopReservations = async (req,res)=>{
   const id = req.params.id;
   try{
-    const resourcesWithEvents = await db.Machine.findAll({where:{workshopId:id},include:{model:db.Reservation}})
+    const resourcesWithEvents = await db.Machine.findAll({where:{workshopId:id},include:{model:db.Reservation,include:{model:db.Employee,include:db.User}}})
     res.send(resourcesWithEvents)
   }catch(err){
     res.send(err)

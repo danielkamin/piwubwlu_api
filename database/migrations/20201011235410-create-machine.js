@@ -24,7 +24,7 @@ module.exports = {
         type: Sequelize.BOOLEAN
       },
       additionalInfo:{
-        type: Sequelize.TEXT
+        type: Sequelize.JSONB
       },
       createdAt: {
         allowNull: false,

@@ -14,10 +14,10 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   Employee.init({
-    information: DataTypes.STRING,
+    information: DataTypes.JSON,
     position:DataTypes.STRING,
     telephone:DataTypes.STRING,
-    room:DataTypes.STRING
+    room:DataTypes.STRING,
   }, {
     sequelize,
     modelName: 'Employee',

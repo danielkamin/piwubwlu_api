@@ -14,6 +14,7 @@ const utilsRouter = require( './Routes/utils')
 const guestRouter = require( './Routes/guest')
 const degreeRouter = require('./Routes/degree')
 const CASRouter = require('./Routes/cas')
+const statsRouter = require('./Routes/stats')
 const workshopTypeRouter = require( './Routes/workshopType')
 const cron = require( 'node-cron')
 const {cronSetup} = require( './Utils/emailConfig')
@@ -52,11 +53,14 @@ app.use('/api/guests',guestRouter)
 app.use('/api/utils',utilsRouter)
 app.use('/api/degrees',degreeRouter)
 app.use('/api/cas',CASRouter)
-
+app.use('/api/stats',statsRouter)
 
 
 const port = process.env.PORT || 5000;
 
+// app.listen(port, () => {
+//   console.log(`Resource Server is running on port ${port}`);
+// });
 
 https.createServer(options, app).listen(port,() => {
   console.log('Server listening on port ' + port);

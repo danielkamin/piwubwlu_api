@@ -9,7 +9,7 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       comment: {
-        type: Sequelize.TEXT
+        type: Sequelize.JSONB
       },
       createdAt: {
         allowNull: false,

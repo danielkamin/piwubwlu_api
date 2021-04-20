@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
     maxUnit:DataTypes.INTEGER,
     machineState: DataTypes.BOOLEAN,
     imagePath:DataTypes.STRING,
-    additionalInfo:DataTypes.STRING
+    additionalInfo:DataTypes.JSON
   }, {
     sequelize,
     modelName: 'Machine',

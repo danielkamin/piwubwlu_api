@@ -17,7 +17,7 @@ exports.MachineValidation = (data) => {
     maxUnit:Joi.number().min(1).max(48).required(),
     machineState: Joi.boolean().required(),
     workshopId: Joi.number().required(),
-    additionalInfo:Joi.string().max(800).allow(null, '')
+    additionalInfo:Joi.any()
   });
   return schema.validate(data);
 };
@@ -39,7 +39,7 @@ exports.WorkshopValidation = (data) => {
     typeId: Joi.any(),
     labId: Joi.any().required(),
     employees: Joi.array(),
-    additionalInfo:Joi.string().max(800).allow(null, '')
+    additionalInfo:Joi.any()
   });
   return schema.validate(data);
 };
@@ -54,7 +54,7 @@ exports.ReservationValidation = (data) => {
 };
 exports.EmployeeProfileValidation = (data)=>{
   const schema = Joi.object({
-    information: Joi.string().max(800),
+    information: Joi.any()
   })
   return schema.validate(data)
 }

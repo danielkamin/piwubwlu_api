@@ -5,9 +5,10 @@ const uniqBy = require('lodash/uniqBy')
 const {ReservationTypes} = require('../Utils/constants')
 const Op = db.Sequelize.Op;
 exports.createReservation = async (req, res) => {
+  
   let data = req.body;
-
-  let employee = await db.Employee.findOne({where:{userId:req.user.id}})
+  let employee = await db.Employee.findOne({where:{userId:req.user.id},include:db.User})
+  const machine = await db.Machine.findByPk(data.machineId)
   if(!employee) return res.status(400).send({ok:false})
 
   data.employeeId = employee.id;
@@ -21,8 +22,15 @@ exports.createReservation = async (req, res) => {
       end_date:data.end_date,
       employeeId:data.employeeId,
       machineId:data.machineId});
-    res.on('finish',async function(){
-      await sendSupervisorEmails(data.machineId,db,'Rezerwacja - nowa w systemie')
+    res.on('finish',function(){
+      sendSupervisorEmails(data.machineId,db,'Nowa rezerwacja w systemie',
+      `Została złożona nowa rezerwacja na maszynę: ${machine.name}. \n
+      początek: ${new Date(data.start_date).toLocaleString('pl-PL')} \n
+      koniec: ${new Date(data.end_date).toLocaleString('pl-PL')} `)
+      sendMessage(employee.User.email,'Potwierdzenie rezerwacji',
+      `Potwierdzenie złożenia rezerwacji na maszynę ${machine.name}. \n
+      początek: ${new Date(data.start_date).toLocaleString('pl-PL')} \n
+      koniec: ${new Date(data.end_date).toLocaleString('pl-PL')} `)
     })
     res.send({ok:true});
   } catch (err) {
@@ -31,10 +39,10 @@ exports.createReservation = async (req, res) => {
 };
 exports.updateReservation = async(req,res)=>{
   let data = req.body;
-  let employee = await db.Employee.findOne({where:{userId:req.user.id}})
+  let employee = await db.Employee.findOne({where:{userId:req.user.id},include:db.User})
+  const machine = await db.Machine.findByPk(data.machineId)
   if(!employee) return res.status(400).send({ok:false})
   data.employeeId = employee.id;
-  console.log(data)
   const { error } = ReservationValidation(data);
   if (error) return res.status(400).send(error.details[0].message);
   try{
@@ -44,8 +52,16 @@ exports.updateReservation = async(req,res)=>{
       employeeId:data.employeeId,
       machineId:data.machineId
     },{where:{id:req.params.id}})
-    res.on('finish',async function(){
-      await sendSupervisorEmails(data.machineId,db,'Rezerwacja - aktualizacja')
+    await db.ReservationDeclineComment.destroy({where:{reservationId:req.params.id}})
+    res.on('finish',function(){
+      sendSupervisorEmails(data.machineId,db,'Rezerwacja - aktualizacja',
+      `Aktualizacja rezerwacji na maszynę: ${machine.name}. \n
+      początek: ${new Date(data.start_date).toLocaleString('pl-PL')} \n
+      koniec: ${new Date(data.end_date).toLocaleString('pl-PL')} `)
+      sendMessage(employee.User.email,'Potwierdzenie aktualizacji rezerwacji',
+      `Potwierdzenie aktualizacji rezerwacji na maszynę ${machine.name}. \n
+      początek: ${new Date(data.start_date).toLocaleString('pl-PL')} \n
+      koniec: ${new Date(data.end_date).toLocaleString('pl-PL')} `)
     })
     res.send({ok:true})
   }catch(err){
@@ -53,13 +69,20 @@ exports.updateReservation = async(req,res)=>{
   }
 }
 exports.cancelReservation = async(req,res)=>{
-  const reservation = await db.Reservation.findByPk(req.params.id)
+  const reservation = await db.Reservation.findByPk(req.params.id,{include:db.Machine})
   const user = await db.Employee.findByPk(reservation.employeeId,{include:db.User})
+  //const message = req.body.message;
   try{
     await db.Reservation.destroy({where:{id:req.params.id}});
-    res.on('finish',async function(){
-      await sendSupervisorEmails(reservation.machineId,db,'Rezerwacja - usunięty rekord')
-      sendMessage(user.User.email,'Usunięta rezerwacja','Z systemu została usunięta twoja rezerwacja. Po więcej szczegółów proszę odwiedzić platformę');
+    res.on('finish',function(){
+      sendSupervisorEmails(reservation.machineId,db,'Rezerwacja - usunięty rekord',
+      `Została usunięta rezerwacja na maszynę: ${reservation.Machine.name}. \n
+      początek: ${new Date(data.start_date).toLocaleString('pl-PL')} \n
+      koniec: ${new Date(data.end_date).toLocaleString('pl-PL')} `)
+      sendMessage(user.User.email,'Potwierdzenie usunięcia rezerwacji',
+      `Potwierdzenie usunięcia rezerwacji na maszynę ${reservation.Machine.name}. \n
+      początek: ${new Date(reservation.start_date).toLocaleString('pl-PL')} \n
+      koniec: ${new Date(reservation.end_date).toLocaleString('pl-PL')} `)
     })
     res.send({ok:true})
   }catch(err){
@@ -109,14 +132,12 @@ exports.getAllSupervisedReservation = async (req,res)=>{
     const userId = req.user.id;
     const employee = await db.Employee.findOne({where:{userId:userId},include:{model:db.Lab}})
     let labSupervised = []
-    console.log(employee.toJSON())
     if(employee.Lab!=null){
       labSupervised = 
     await db.Reservation.findAll({attributes:['id','state','start_date','end_date',],include:
     {model:db.Machine,attributes:['id','name','english_name'],required:true,include:
     {model:db.Workshop,attributes:['id','name','english_name'],required:true,where:{labId:employee.Lab.id}}}})
   }
-    console.log(labSupervised)
     const workshopSupervised = await db.Reservation.findAll({attributes:['id','state','start_date','end_date',],include:
     {model:db.Machine,attributes:['id','name','english_name'],required:true,include:
     {model:db.Workshop,attributes:['id','name','english_name'],required:true,include:{model:db.Employee,where:{userId:userId}}}}});
@@ -132,7 +153,7 @@ exports.getAllOwnedReservation = async (req,res)=>{
   try{
     const reservations = await db.Reservation.findAll({include:[
       {model:db.Employee,where:{userId:req.user.id}},
-      {model:db.Machine,include:db.Workshop},{model:db.ReservationSurvey}]})    
+      {model:db.Machine,required: true,include:db.Workshop,},{model:db.ReservationSurvey}]})    
     res.send(reservations)
   }catch(err)
   {
@@ -141,22 +162,32 @@ exports.getAllOwnedReservation = async (req,res)=>{
 }
 exports.getReservationById = async (req,res)=>{
   const reservation = await db.Reservation.findOne({where:{id:req.params.id},
-    include:[{model:db.Employee,include:db.User},{model:db.Machine},{model:db.ReservationSurvey}]
+    include:[{model:db.Employee,include:db.User},{model:db.Machine},{model:db.ReservationSurvey},{model:db.ReservationDeclineComment}]
     })
   res.send(reservation)
 }
-exports.updateSupervisedState = async (req,res)=>{
+exports.updateReservationState = async (req,res)=>{
   const reservation = await db.Reservation.findByPk(req.params.id,{include:db.Machine})
   if(!reservation) return res.status(400).send({ok:false})
   const employee = await db.Employee.findOne({where:{id:reservation.employeeId},include:{model:db.User}})
+  const {comment,commentHTML} = req.body;
   try
     {if(req.body.accept===true){
       await reservation.update({state:ReservationTypes.ACCEPTED});
-      sendMessage(employee.User.email,'Akceptacja Rezerwacji',`Rezerwacja na maszynę: ${reservation.Machine.name} została zaakceptowana`)
+      await db.ReservationDeclineComment.destroy({where:{reservationId:req.params.id}})
+      sendMessage(employee.User.email,'Akceptacja Rezerwacji',
+      `Potwierdzenie akceptacji rezerwacji na maszynę ${reservation.Machine.name}. \n
+      początek: ${new Date(reservation.start_date).toLocaleString('pl-PL')} \n
+      koniec: ${new Date(reservation.end_date).toLocaleString('pl-PL')} `)
       res.send({ok:true})
     }else{
+      //reservation decline comment
+      await db.ReservationDeclineComment.create({reservationId:reservation.id,comment:comment})
       await reservation.update({state:ReservationTypes.DECLINED});
-      sendMessage(employee.User.email,'Odrzucenie Rezerwacji',`Rezerwacja na maszynę: ${reservation.Machine.name} została odrzucona`)
+      sendMessage(employee.User.email,'Odrzucenie Rezerwacji',
+      `Potwierdzenie odrzucenia rezerwacji na maszynę ${reservation.Machine.name}. \n
+      Początek: ${new Date(reservation.start_date).toLocaleString('pl-PL')},  \n
+      Koniec: ${new Date(reservation.end_date).toLocaleString('pl-PL')} `,commentHTML)
       res.send({ok:true})
     }
   }
@@ -168,24 +199,19 @@ exports.updateSupervisedState = async (req,res)=>{
 exports.upcomingReservations = async (req,res)=>{
   const today = new Date()
   let tomorrow =  new Date()
-  console.log(today)
   
   tomorrow.setDate(today.getDate() + 1)  
-  console.log(tomorrow)
   const upcomingReservations = await db.Reservation.findAll({where:{start_date:{[Op.gte]:today}},include:[{model:db.Employee,include:db.User},{model:db.Machine}]})
   res.send(upcomingReservations)
 }
 exports.latestReservations = async (req,res)=>{
   const today = new Date()
   let yesterday =  new Date()
-  console.log(today)
   yesterday.setDate(today.getDate() -1)
-  console.log(yesterday)
   const latestReservations = await db.Reservation.findAll({where:{end_date:{[Op.lt]:today,[Op.gte]:yesterday}},include:[{model:db.Employee,include:db.User},{model:db.Machine}]})
   res.send(latestReservations)
 }
 exports.sendSurvey = async(req,res)=>{
-  console.log(req.body)
   const reservation = await db.Reservation.findByPk(req.params.id,{include:db.ReservationSurvey})
   if(reservation.ReservationSurvey!==null) return res.send('Ankieta została już wypełniona')
   await db.ReservationSurvey.create({reservationId:req.params.id,comment:req.body.comment})
@@ -203,3 +229,20 @@ exports.isOwner = async (req,res)=>{
   if(!reservation) return res.status(400).send({ok:false});
   res.send({ok:true});
 }
+
+exports.getCancelReservationForm =async(req,res)=>{
+  const emp = await db.Employee.findOne({where:{userId:req.user.id}})
+  const declineForm =await db.ReservationDeclineComment.findOne({where:{reservationId:req.params.id}})
+  if(declineForm!==null) return res.status(400).send({ok:false});
+
+  res.send({ok:true})
+  // const reservation =await db.Reservation.findOne({where:{id:req.params.id},include:[
+  //   {model:db.Machine,include:[
+  //     {model:db.Workshop,include:[{model:db.Employee},{model:db.Lab}]}]},]})
+  // console.log(reservation.Machine.Workshop.Employees)
+  // console.log(reservation.Machine.Workshop.Lab)
+  //powód odrzucenia lub komentarz po zakończonej
+  // if(!reservation || reservation.ReservationSurvey!==null) return res.status(400).send({ok:false})
+  
+}
+

@@ -61,19 +61,21 @@ exports.uploadProfilePicture = async (req,res)=>{
  
 }
 exports.updateProfileInfo = async(req,res)=>{
+  const id = req.user.id;
   try{
     await db.User.update({
       firstName:req.body.firstName,
       lastName:req.body.lastName,
       email:req.body.email,},
-      {where:{id:req.user.id}})
-    if(req.body.employee){ 
+      {where:{id:id}})
+
+    if(req.body.employee===true){ 
       await db.Employee.update({
         information:req.body.information,
         telephone:req.body.telephone,
         room:req.body.room,
-      degreeId:req.body.degreeId},
-        {where:{userId:req.user.id}})
+        degreeId:req.body.degreeId===0?null:req.body.degreeId,},
+        {where:{userId:id}})
       }
       res.send({ok:true})
   }catch(err){

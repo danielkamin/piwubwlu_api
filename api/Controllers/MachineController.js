@@ -35,7 +35,6 @@ exports.removeMachine = async (req, res) => {
 exports.updateMachine = async (req, res) => {
   const machine = await db.Machine.findByPk(req.params.id);
   if (!machine) return res.status(400).send('Problem occurred while finding this machine');
-  console.log(req.body)
   const values = {
     name: req.body.name,
     english_name: req.body.english_name,

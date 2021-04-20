@@ -52,6 +52,11 @@ module.exports = {
       references: { model: 'Workshops', key: 'id' },
       onDelete: 'SET NULL',
     })
+    queryInterface.addColumn('ReservationDeclineComments','reservationId',{
+      type: Sequelize.INTEGER,
+      references: { model: 'Reservations', key: 'id' },
+      onDelete: 'CASCADE',
+    })
   },
 
   down: async (queryInterface, Sequelize) => {
@@ -65,5 +70,6 @@ module.exports = {
       queryInterface.removeColumn('UserRoles', 'userId'),
       queryInterface.removeColumn('UserRoles', 'roleId'),
       queryInterface.removeColumn('Machines', 'workshopId')
+      queryInterface.removeColumn('ReservationDeclineComments','reservationId')
   }
 };

@@ -28,22 +28,26 @@ exports.verifyTransport = ()=>{
  * @param {string} email Recipient address.
  * @param {string} subject Subject of the message.
  * @param {string} messageBody Text included in message's body.
+ * @param {html} html Additional HTML format message
  * @return asynchronusly sends email message.
  */
-exports.sendMessage = (email, subject, messageBody)=>{  
-  console.log(emailSettings)
+const sendMessage = (email, subject, messageBody,html)=>{  
     const message = {
       from: process.env.MAIL_USER,
       to: email,
-      subject: subject,
+      subject: "Testy platformy!! "+subject,
       text: messageBody,
+      html:html
     };
-    console.log(message)
+    if(html)
+      message.html = messageBody +'<br/>' + html;
+    else 
+      message.text =messageBody;
+    
     emailSettings.sendMail(message,(error,info)=>{
       if(error){
         console.log(error)
-      }else{
-        
+      }else{      
         console.log('Email sent to: '+info.response)
       }
     });
@@ -101,7 +105,7 @@ const cronReservationStateChange = async(cron,db,Op)=>{
   },{scheduled:true,timezone:"Europe/Warsaw"})
 }
 
-exports.sendSupervisorEmails = async (machineId,db,title)=>{
+exports.sendSupervisorEmails = async (machineId,db,title,message)=>{
   let supervisors = await db.Machine.findByPk(machineId,{include:{model:db.Workshop,include:[{model:db.Employee,include:db.User},{model:db.Lab,include:{model:db.Employee,include:db.User}}]}})
   const workshopSupervisorsOrder = await db.WorkshopSupervisor.findAll({where:{WorkshopId:supervisors.Workshop.id}})
   /* All workshop supervisors */
@@ -118,8 +122,8 @@ exports.sendSupervisorEmails = async (machineId,db,title)=>{
   }).indexOf(workshopSupervisorsOrder[0].EmployeeId)
   try{
     const workshopSupervisorEmail = supervisors.Workshop.Employees[firstSupervisorIndex].User.email
-    workshopSupervisorEmail !==null && sendMessage(workshopSupervisorEmail,title,`Została złożona nowa prośba na maszynę: ${supervisors.name}`)
-    supervisors.Workshop.Lab.Employee.User.email !==null && sendMessage(supervisors.Workshop.Lab.Employee.User.email,title,`Została złożona nowa prośba na maszynę: ${supervisors.name}`)
+    workshopSupervisorEmail !==null && sendMessage(workshopSupervisorEmail,title,message)
+    supervisors.Workshop.Lab.Employee.User.email !==null && sendMessage(supervisors.Workshop.Lab.Employee.User.email,title,message)
   }catch(err){
     console.log(err)
   }
@@ -132,3 +136,11 @@ exports.sendMachineSuspendedEmails = async (machineId,db)=>{
     sendMessage(item.Employee.User.email,'Maszyna nieaktywna',`Wszytskie rezerwacje na maszynę ${item.Machine.name} zostały tymczasowo anulowane. Proszę o sprawdzanie statusu na paltformie`)
   })
 }
+/**
+ * 
+ * @param {number} machineId Id of machine that is beeing rented
+ */
+exports.sendToDepartmentHeadMessage = async (machineId)=>{
+
+}
+exports.sendMessage = sendMessage

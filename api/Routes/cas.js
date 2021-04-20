@@ -3,8 +3,8 @@ const CASRouter = express.Router();
 const {CASLogin,protected} = require('../Controllers/Account/CASController')
 const CASAuthentication = require('cas-authentication');
 const cas = new CASAuthentication({
-  cas_url         : 'https://idm.uci.pb.edu.pl/cas',
-  service_url     : 'http://77.46.45.243:5000'
+  cas_url         : 'https://casserver.herokuapp.com/cas',
+  service_url     : 'http://77.46.45.243:3000'
 });
 
 // Unauthenticated clients will be redirected to the CAS login and then back to

@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   ReservationSurvey.init({
-    comment: DataTypes.STRING
+    comment: DataTypes.JSON
   }, {
     sequelize,
     modelName: 'ReservationSurvey',

@@ -18,7 +18,7 @@ module.exports = {
         type: Sequelize.STRING(15)
       },
       additionalInfo:{
-        type:Sequelize.TEXT
+        type:Sequelize.JSONB
       },
       typeId:{
         type: Sequelize.INTEGER,

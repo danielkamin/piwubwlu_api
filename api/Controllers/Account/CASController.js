@@ -1,8 +1,7 @@
 const {WEB_URL} = require('../../Utils/constants')
 
 exports.SSOLogin =  (req,res)=>{
-    res.header('Access-Control-Allow-Origin','*')
-    res.redirect('https://idm.uci.pb.edu.pl/cas/login')
+    res.redirect('https://casserver.herokuapp.com/cas/login')
 }
 
 exports.CASLogin = ( req, res )=> {
