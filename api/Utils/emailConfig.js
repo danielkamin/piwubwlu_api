@@ -1,4 +1,5 @@
-const nodemailer = require('nodemailer')
+const nodemailer = require('nodemailer');
+const db = require('../../database/models');
 const {ReservationTypes} = require('./constants')
 Array.prototype.move = function (from,to) {
   this.splice(to, 0, this.splice(from, 1)[0]);
@@ -138,9 +139,24 @@ exports.sendMachineSuspendedEmails = async (machineId,db)=>{
 }
 /**
  * 
- * @param {number} machineId Id of machine that is beeing rented
+ * @param {object} reservation Object of currently processed reservation
  */
-exports.sendToDepartmentHeadMessage = async (machineId)=>{
-
+exports.sendToDepartmentHeadMessage = async (reservation)=>{
+  console.log(reservation)
+  const departmentHeadMessage = await db.Reservation.findOne({where:{id:reservation.id},
+    include:{model:db.Machine,
+      include:{model:db.Workshop,
+        include:{model:db.Lab,
+        include:{model:db.Department}}}}});
+  
+  const empId = departmentHeadMessage.Machine.Workshop.Lab.Department.employeeId
+  const user= await db.Employee.findOne({where:{id:empId},include:db.User})
+  sendMessage(user.User.email,'Powiadomienie o nowej rezerwacji',
+  `Jest to automatyczna wiadomość wysłana przez Wydziałowe Centrum Rezerwacji Aparatury Badawczej na Wydziale Mechanicznym. \n\r 
+  W celu wyrażenia swojej zgody na rezerwację aparatury: ${departmentHeadMessage.Machine.name}
+  odbywającej się 
+  od: ${new Date(departmentHeadMessage.start_date).toLocaleString('pl-PL')}
+  do: ${new Date(departmentHeadMessage.end_date).toLocaleString('pl-PL')},
+  uprasza się przesłać tę wiadomość do jednej z wybranych osób nadzorujących tę aparaturę.`)
 }
 exports.sendMessage = sendMessage

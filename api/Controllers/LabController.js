@@ -2,7 +2,6 @@ const db = require('../../database/models')
 const { LabValidation } = require('../Validation/resource')
 const supervisorCheck = require('../Utils/supervisorCheck')
 exports.createLab = async (req, res) => {
-  console.log(req.body)
   const { error } = LabValidation(req.body);
   if (error) return res.status(400).send(error.details[0].message);
   let empId = req.body.employeeId!==''?req.body.employeeId:null

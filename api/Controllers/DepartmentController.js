@@ -2,11 +2,13 @@ const db = require('../../database/models')
 const {DepartmentValidation} = require('../Validation/resource')
 exports.createDepartment = async (req,res)=>{
     const { error } = DepartmentValidation(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
+    if (error) return res.status(400).send(error.details[0].message);
+    const empId = req.body.employeeId!==''?req.body.employeeId:null
     try{
         await db.Department.create({
             name:req.body.name,
-            english_name:req.body.english_name
+            english_name:req.body.english_name,
+            employeeId:empId,
         });
         res.send({ ok: true });
     }catch(err)
@@ -17,11 +19,13 @@ exports.createDepartment = async (req,res)=>{
 exports.updateDepartment = async (req,res)=>{
     const { error } = DepartmentValidation(req.body);
   if (error) return res.status(400).send(error.details[0].message);
+  const empId = req.body.employeeId!==''?req.body.employeeId:null
     try{
         await db.Department.update(
             {
-              name: req.body.name,
-              english_name: req.body.english_name
+                name:req.body.name,
+                english_name:req.body.english_name,
+                employeeId:empId,
             },
             { where: { id: req.params.id } }
           );

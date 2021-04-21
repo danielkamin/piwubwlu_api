@@ -60,13 +60,13 @@ exports.register = async (req, res) => {
       res.status(400).send(err);
     }
   };
-  exports.login = async (req, res) => {
-    const { error } = loginValidation(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
-    const user = await db.User.findOne({ where: { email: req.body.email, } });
-    if (!user) return res.status(400).send('E-mail lub hasło są nieprawidłowe');
-    validatePassAndResult(req,res,user,false);
-  };
+exports.login = async (req, res) => {
+  const { error } = loginValidation(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
+  const user = await db.User.findOne({ where: { email: req.body.email, } });
+  if (!user) return res.status(400).send('E-mail lub hasło są nieprawidłowe');
+  validatePassAndResult(req,res,user,false);
+};
   exports.adminLogin = async (req,res)=>{
     const { error } = loginValidation(req.body);
     if (error) return res.status(400).send(error.details[0].message);

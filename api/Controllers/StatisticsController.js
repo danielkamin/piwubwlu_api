@@ -26,7 +26,29 @@ exports.getYearlyStatistics = async (req, res) => {
 }
 
 exports.getPersonalStatistics = async (req, res) => {
-  console.log(req.query)
-  const reservations = await db.Reservation.findAll({ where: { employeeId: req.query.id } });
-  res.send(reservations)
+  console.log(req.params)
+  const reservations = await db.Reservation.findAll({ 
+    where: { machineId: req.params.id },
+    include:{model:db.Employee,
+      include:{model:db.User,attributes:['id','firstName','lastName']},} });
+  
+  const groups = reservations.reduce((groups,reservation)=>{
+    const user = JSON.stringify(reservation.Employee.User);
+    if(!groups[user]){
+      groups[user] = [];
+    }
+    groups[user].push((reservation.end_date.getTime()-reservation.start_date.getTime())/60000)
+    return groups;
+  },[])
+  const groupArrays = Object.keys(groups).map((user) => {
+    let amountOfMinutes = 0;
+    groups[user].forEach(minutes=>{
+      amountOfMinutes+=minutes
+    })
+    return {
+      user,
+      time: amountOfMinutes
+    };
+  });
+  res.send(groupArrays)
 }

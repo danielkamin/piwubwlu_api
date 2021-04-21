@@ -63,6 +63,7 @@ exports.DepartmentValidation = (data)=>{
     id:Joi.number(),
     name: Joi.string().max(60),
     english_name: Joi.string().max(60),
+    employeeId:Joi.any(),
   })
   return schema.validate(data)
 }

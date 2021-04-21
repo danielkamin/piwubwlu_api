@@ -30,8 +30,9 @@ exports.updateEmployee= async (req,res)=>{
          await db.Employee.destroy({where:{userId:id}});
       }
       else {
+         console.log(req.body)
          await db.Employee.update({
-            departmentId:req.body.departmentId===0?null:req.body.departmentId,
+            departmentId:req.body.departmentId===0?null:+(req.body.departmentId),
             degreeId:req.body.degreeId===0?null:req.body.degreeId,
             telephone:req.body.telephone,
             room:req.body.room},

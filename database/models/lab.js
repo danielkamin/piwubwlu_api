@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       Lab.belongsTo(models.Employee,{foreignKey:'employeeId'});
+      Lab.belongsTo(models.Department,{foreignKey:'departmentId'});
       Lab.hasMany(models.Workshop,{foreignKey:'labId'})
     }
   };

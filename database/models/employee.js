@@ -10,6 +10,7 @@ module.exports = (sequelize, DataTypes) => {
       Employee.belongsTo(models.User,{foreignKey:'userId',onDelete:'CASCADE'})
       Employee.belongsToMany(models.Workshop,{through:'WorkshopSupervisors'})
       Employee.hasOne(models.Lab,{foreignKey:'employeeId'})
+      Employee.hasOne(models.Department,{foreignKey:'employeeId'})
       Employee.hasOne(models.Reservation,{foreignKey:'employeeId'})
     }
   };

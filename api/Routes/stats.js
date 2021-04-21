@@ -6,6 +6,6 @@ const express = require('express')
 const statsRouter = express.Router();
 
 statsRouter.get('/yearly',verifyAccessToken,authorizeAdmin,getYearlyStatistics)
-statsRouter.get('/personal',verifyAccessToken,authorizeAdmin,getPersonalStatistics)
+statsRouter.get('/personal/:id',verifyAccessToken,authorizeAdmin,getPersonalStatistics)
 
 module.exports = statsRouter;

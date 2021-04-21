@@ -56,12 +56,22 @@ module.exports = {
       type: Sequelize.INTEGER,
       references: { model: 'Reservations', key: 'id' },
       onDelete: 'CASCADE',
+    }),
+    await queryInterface.addColumn('Departments','employeeId',{
+      type: Sequelize.INTEGER,
+      references: { model: 'Employees', key: 'id' },
+      onDelete: 'SET NULL',
+    }),
+    await queryInterface.addColumn('Labs','departmentId',{
+      type: Sequelize.INTEGER,
+      references: { model: 'Departments', key: 'id' },
+      onDelete: 'SET NULL',
     })
   },
 
   down: async (queryInterface, Sequelize) => {
-    queryInterface.removeColumn('Employees', 'userId'),
-    queryInterface.removeColumn('Employees', 'degreeId'),
+      queryInterface.removeColumn('Employees', 'userId'),
+      queryInterface.removeColumn('Employees', 'degreeId'),
       queryInterface.removeColumn('Workshops', 'labId'),
       queryInterface.removeColumn('ReservationSurveys', 'reservationId'),
       queryInterface.removeColumn('ResetTokens', 'userId'),
@@ -70,6 +80,8 @@ module.exports = {
       queryInterface.removeColumn('UserRoles', 'userId'),
       queryInterface.removeColumn('UserRoles', 'roleId'),
       queryInterface.removeColumn('Machines', 'workshopId')
-      queryInterface.removeColumn('ReservationDeclineComments','reservationId')
+      queryInterface.removeColumn('ReservationDeclineComments','reservationId'),
+      await queryInterface.removeColumn('Departments', 'employeeId'),
+      await queryInterface.removeColumn('Labs', 'departmentId')
   }
 };
