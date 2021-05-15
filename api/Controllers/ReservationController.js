@@ -1,5 +1,6 @@
 const db = require('../../database/models/index')
-const {sendMessage,sendSupervisorEmails,sendToDepartmentHeadMessage} = require('../Utils/emailConfig')
+const {sendSupervisorEmails,sendToDepartmentHeadMessage} = require('../EmailService/messages')
+const {sendMessage} = require('../EmailService/config')
 const { ReservationValidation } = require('../Validation/resource')
 const uniqBy = require('lodash/uniqBy')
 const {ReservationTypes} = require('../Utils/constants')

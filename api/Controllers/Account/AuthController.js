@@ -4,7 +4,7 @@ const {roles,guestTypes,WEB_URL} = require('../../Utils/constants')
 const { sendRefreshToken } = require('../../Utils/sendRefreshToken')
 const { createRefreshToken, createAccessToken } = require('../../Utils/tokenCreate')
 const { registerValidation, loginValidation, adminLoginValidation } = require('../../Validation/auth')
-const {sendMessage} = require('../../Utils/emailConfig')
+const {sendMessage} = require('../../EmailService/config')
 
 const validatePassAndResult = async (req,res,user,isAdmin)=>{
     const validPassword = await bcrypt.compare(req.body.password, user.password);

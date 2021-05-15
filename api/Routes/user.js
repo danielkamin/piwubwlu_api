@@ -1,7 +1,7 @@
 const { verifyAccessToken } = require('../Middlewares/tokenVerify')
 const { authorizeAdmin } = require('../Middlewares/rolesAuthorize')
 const express = require('express')
-const {deleteImage} = require('../Middlewares/uploadImage')
+const {deleteImage} = require('../Middlewares/imageHandler')
 const db = require("../../database/models")
 const {getProfileInfo,uploadProfilePicture,updateProfileInfo,changePassword,deleteUser} = require('../Controllers/UserController')
 const upload = require('../Utils/multerConfig')

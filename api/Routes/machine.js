@@ -5,7 +5,7 @@ const express = require('express')
 const db = require("../../database/models")
 const Op = db.Sequelize.Op;
 const upload = require('../Utils/multerConfig')
-const {uploadImage,deleteImage} = require('../Middlewares/uploadImage')
+const {uploadImage,deleteImage} = require('../Middlewares/imageHandler')
 const {
     createMachine,
     updateMachine,

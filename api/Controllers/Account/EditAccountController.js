@@ -3,7 +3,7 @@ const db = require( '../../../database/models')
 const {WEB_URL} = require( '../../Utils/constants')
 const { createResetToken } = require( '../../Utils/tokenCreate')
 const { emailValidation, newPasswordValidation } = require( '../../Validation/auth')
-const {sendMessage} = require( '../../Utils/emailConfig')
+const {sendMessage} = require('../../EmailService/config')
 
 exports.requestNewPasswordForm = async (req, res) => {
   const { error } = emailValidation(req.body);

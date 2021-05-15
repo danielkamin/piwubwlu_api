@@ -7,7 +7,7 @@ const {authorizeAdmin} = require('../Middlewares/rolesAuthorize')
 const upload = require('../Utils/multerConfig')
 const {createWorkshop,updateWorkshop,removeWorkshop, getAllWorkshop, 
     getHelperNamesWorkshops,getWorkshopById, getWorkshopsList,getWorkshopReservations} = require('../Controllers/WorkshopController')
-const {uploadImage,deleteImage} = require('../Middlewares/uploadImage')
+const {uploadImage,deleteImage} = require('../Middlewares/imageHandler')
 const workshopRouter = express.Router();
 workshopRouter.get('/names', getHelperNamesWorkshops);
 workshopRouter.get('/reservations/:id', getWorkshopReservations);

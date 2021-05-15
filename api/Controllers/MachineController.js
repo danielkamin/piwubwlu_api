@@ -1,6 +1,7 @@
 const db = require('../../database/models')
 const _ = require("lodash");
-const {sendMessage,sendMachineSuspendedEmails} = require('../Utils/emailConfig')
+const {sendMessage} = require('../EmailService/config')
+const {sendMachineSuspendedEmails} = require('../EmailService/messages')
 const { MachineValidation } = require('../Validation/resource')
 const Op = db.Sequelize.Op;
 exports.createMachine = async (req, res) => {

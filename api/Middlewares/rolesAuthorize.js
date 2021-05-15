@@ -1,6 +1,19 @@
 
 const {roles} = require('../Utils/constants');
 const db = require('../../database/models')
+
+exports.authorizeRole= function(role){
+  return (req, res, next)=>{
+    try {
+      if (!req.user.role.includes(role))
+        return res.status(403).send('Unauthorized');
+      next();
+    } catch (err) {
+      res.send(err);
+    }
+  }
+}
+
 exports.authorizeAdmin = async (req, res, next) => {
   try {
     if (!req.user.role.includes(roles[0]))

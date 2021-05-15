@@ -1,6 +1,6 @@
 const db = require('../../database/models')
 const { validatePassword} = require('../Utils/helpers')
-const { sendMessage } = require('../Utils/emailConfig')
+const { sendMessage } = require('../EmailService/config')
 const {roles} = require('../Utils/constants')
 const { guestProfileValidation} = require('../Validation/auth')
 //GET methods - fetch user model with guest join
