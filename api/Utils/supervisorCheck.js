@@ -13,10 +13,8 @@ const supervisorCheck = async (employeeId,db,addSuperRole)=>{
     if(addSuperRole){
         if(!superUserRole) await db.UserRole.create({roleId:superRole.id,userId:emp.userId})
     }else{
-        const labs = await db.Lab.findAll({where:{employeeId:employeeId}})
         const workshops = await db.WorkshopSupervisor.findAll({where:{EmployeeId:employeeId}})
-        if(labs.length===0 && workshops.length===0){
-            console.log(emp)
+        if(workshops.length===0){
             await db.UserRole.destroy({where:{roleId:superRole.id,userId:emp.userId}})
         }
             

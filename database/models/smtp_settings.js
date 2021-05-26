@@ -3,25 +3,26 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class Lab extends Model {
+  class SMTP_Settings extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      Lab.belongsTo(models.Department,{foreignKey:'departmentId'});
-      Lab.hasMany(models.Workshop,{foreignKey:'labId'})
+      // define association here
     }
   };
-  Lab.init({
-    name: DataTypes.STRING,
-    english_name: DataTypes.STRING,
-    imagePath:DataTypes.STRING,
-    additionalInfo:DataTypes.JSON
+  SMTP_Settings.init({
+    user: DataTypes.STRING,
+    pass: DataTypes.STRING,
+    host: DataTypes.STRING,
+    requireTLS: DataTypes.BOOLEAN,
+    sequre: DataTypes.BOOLEAN,
+    port: DataTypes.INTEGER
   }, {
     sequelize,
-    modelName: 'Lab',
+    modelName: 'SMTP_Settings',
   });
-  return Lab;
+  return SMTP_Settings;
 };

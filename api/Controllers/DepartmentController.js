@@ -1,5 +1,8 @@
 const db = require('../../database/models')
 const {DepartmentValidation} = require('../Validation/resource')
+const logger = require('../Config/loggerConfig')
+
+
 exports.createDepartment = async (req,res)=>{
     const { error } = DepartmentValidation(req.body);
     if (error) return res.status(400).send(error.details[0].message);
@@ -13,7 +16,8 @@ exports.createDepartment = async (req,res)=>{
         res.send({ ok: true });
     }catch(err)
     {
-        res.send(err.sql);
+        res.send(err);
+        logger.error({message: err, method: 'createDepartment'})
     }
 }
 exports.updateDepartment = async (req,res)=>{
@@ -32,7 +36,8 @@ exports.updateDepartment = async (req,res)=>{
           res.send({ ok: true });
     }catch(err)
     {
-        res.send(err.sql);
+        res.send(err);
+        logger.error({message: err, method: 'updateDepartment'})
     }
 }
 exports.removeDepartment = async (req,res)=>{
@@ -41,7 +46,8 @@ exports.removeDepartment = async (req,res)=>{
         res.send({ok:true});
     }catch(err)
     {
-        res.send(err.original.detail);
+        res.send(err);
+        logger.error({message: err, method: 'removeDepartment'})
     }
 }
 exports.getALLDepartment = async (req,res)=>{
@@ -50,7 +56,8 @@ exports.getALLDepartment = async (req,res)=>{
         res.send(departments)
     }catch(err)
     {
-        res.send(err.sql);
+        res.send(err);
+        logger.error({message: err, method: 'getALLDepartment'})
     }
 }
 exports.getDepartmentById = async (req,res)=>{
@@ -59,7 +66,8 @@ exports.getDepartmentById = async (req,res)=>{
         res.send(department)
     }catch(err)
     {
-        res.send(err.sql);
+        res.send(err);
+        logger.error({message: err, method: 'getDepartmentById'})
     }
 }
 exports.getDepartmentList = async (req,res)=>{
@@ -68,6 +76,8 @@ exports.getDepartmentList = async (req,res)=>{
         res.send(departments)
     }catch(err)
     {
-        res.send(err.sql);
+        res.send(err);
+        logger.error({message: err, method: 'getDepartmentList'})
     }
 }
+

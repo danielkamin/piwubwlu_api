@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       Machine.belongsTo(models.Workshop,{foreignKey:'workshopId'})
       Machine.hasMany(models.Reservation,{foreignKey:'machineId'});
+      Machine.hasMany(models.MachineService,{foreignKey:'machineId'});
     }
   };
   Machine.init({
@@ -16,7 +17,8 @@ module.exports = (sequelize, DataTypes) => {
     maxUnit:DataTypes.INTEGER,
     machineState: DataTypes.BOOLEAN,
     imagePath:DataTypes.STRING,
-    additionalInfo:DataTypes.JSON
+    additionalInfo:DataTypes.JSON,
+    delayTime:DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Machine',

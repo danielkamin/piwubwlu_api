@@ -3,26 +3,11 @@ const Op = db.Sequelize.Op
 const fetch = require('node-fetch')
 const CASUrl = 'https://idm.uci.pb.edu.pl/cas'
 const {WEB_URL_NOPORT,WEB_URL} = require('../Utils/constants')
+const logger = require('../Config/loggerConfig')
 exports.getImagesPath = async (req,res)=>{
     res.send({logoPath:WEB_URL_NOPORT+':5000/uploads/LogoPB.png',bgPath:WEB_URL_NOPORT+':5000/uploads/background.jpg'})
 }
-exports.verifyCaptcha = async(req,res)=>{
-    const user = await db.User.findByPk(req.body.userId,{attributes:['email'],include:{model:db.Employee,attributes:['telephone']}})
-    if (!req.body.captcha)
-      return res.send({ ok: false, msg: 'Please select captcha' });
-  
-    const secret = process.env.CAPTCHA_SECRET;
-    try{
-      const verifyUrl = `https://google.com/recaptcha/api/siteverify?secret=${secret}&response=${req.body.captcha}&remoteip=${req.connection.remoteAddress}`
-      const body = await fetch(verifyUrl).then(res => res.json());
-      if (body.success !== undefined && !body.success)
-        return res.send({ ok: false, msg: 'Failed captcha verification' });
-    
-      return res.send({ ok: true, msg: 'Captcha passed',email:user.email,telephone:user.telephone });
-    }catch(err){
-      res.send(err)
-    }
-  }
+
 exports.searchAllData = async (req,res)=>{
   const name = (req.query.q===undefined)?'':(req.query.q)
   console.log(name)
@@ -78,12 +63,6 @@ exports.searchAllData = async (req,res)=>{
   }
 }
 
-exports.CASLogin = async (req,res)=>{
-  
-}
-exports.CASVerify= async (req,res)=>{
-
-}
 
 exports.fetchAllNames = async (req,res)=>{
   try{
@@ -93,5 +72,6 @@ exports.fetchAllNames = async (req,res)=>{
     res.send(names);
   }catch(err){
     res.send(err)
+    logger.error({message: err, method: 'fetchAllNames'})
   }
 }

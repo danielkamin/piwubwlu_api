@@ -9,7 +9,9 @@
     "migrate": "npx sequelize db:migrate",
     "unmigrate": "npx sequelize db:migrate:undo:all",
     "seed": "npx sequelize db:seed:all",
-    "test": "snyk test"
+    "test": "snyk test",
+    "docker":"npm run migrate && npm run seed && npm start",
+    "restart":""
   },
   "keywords": [],
   "author": "",

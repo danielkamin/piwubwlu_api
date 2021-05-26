@@ -1,5 +1,5 @@
 const db = require('../../database/models')
-
+const logger = require('../Config/loggerConfig')
 exports.getYearlyStatistics = async (req, res) => {
   const reservations = await db.Reservation.findAll({ where: { machineId: req.query.id } });
   const groups = reservations.reduce((groups, reservation) => {

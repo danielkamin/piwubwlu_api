@@ -36,7 +36,10 @@ module.exports = {
       },
       imagePath:{
         type: Sequelize.STRING
-      }
+      },
+      delayTime: {
+        type: Sequelize.INTEGER
+      },
     });
   },
   down: async (queryInterface, Sequelize) => {

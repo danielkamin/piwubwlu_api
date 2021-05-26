@@ -1,6 +1,7 @@
 'use strict';
-const {roles} = require('../../api/Utils/constants');
+const {UserRoles} = require('../../api/Utils/constants');
 const bcrypt = require('bcrypt')
+
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     const salt = await bcrypt.genSalt(10);
@@ -15,7 +16,8 @@ module.exports = {
       updatedAt: new Date()
     }],{ returning: ['id'] })
     let data = [];
-    roles.forEach((role)=>{
+
+    Object.keys(UserRoles).forEach(role=>{
       data.push({
         role_name:role,
         createdAt: new Date(),
@@ -23,8 +25,8 @@ module.exports = {
       })
     })
 
-    const rolesQuery = await queryInterface.bulkInsert('Roles',data,{ returning: ['id'] }) 
-    const userRolesQuery =  await queryInterface.bulkInsert('UserRoles',[{
+    const rolesQuery = await queryInterface.bulkInsert('Roles',data,{ returning: ['id'] })
+    await queryInterface.bulkInsert('UserRoles',[{
       userId:user[0].id,roleId:rolesQuery[0].id,      
        createdAt: new Date(),
        updatedAt: new Date()
@@ -33,11 +35,20 @@ module.exports = {
         createdAt: new Date(),
         updatedAt: new Date()
       },{
-       userId:user[0].id,roleId:rolesQuery[2].id,      
+        userId:user[0].id,roleId:rolesQuery[2].id,      
+         createdAt: new Date(),
+         updatedAt: new Date()
+       },
+       {
+        userId:user[0].id,roleId:rolesQuery[3].id,      
+         createdAt: new Date(),
+         updatedAt: new Date()
+       },{
+       userId:user[0].id,roleId:rolesQuery[4].id,      
         createdAt: new Date(),
         updatedAt: new Date()
       },{
-        userId:user[0].id,roleId:rolesQuery[3].id,      
+        userId:user[0].id,roleId:rolesQuery[5].id,      
          createdAt: new Date(),
          updatedAt: new Date()
        }])

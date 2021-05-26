@@ -1,7 +1,7 @@
 
 const cron = require( 'node-cron')
 const {sendMessage} = require('./config')
-
+const {sendMonthlyStatistics} = require('./messages')
 /**
  * Configuration function, that sets up e-mail sending cron jobs for the server
  * @param {Object} cron 
@@ -13,7 +13,8 @@ exports.cronSetup = (db)=>{
     cronSurveyReminder(db,Op)
     cronReservationStateChange(db,Op)
 }
-  
+  //po zakończeniu pracy serwera wszystkie cron-job'y znikają
+      //ustawienie cron-jobów po restarcie serwera
   
 
 const cronUpcomingReservations = async (db,Op)=>{
@@ -30,30 +31,47 @@ const cronUpcomingReservations = async (db,Op)=>{
       })
     },{scheduled:true,timezone:"Europe/Warsaw"})
   }
-  const cronSurveyReminder = async (db,Op)=>{
-    cron.schedule('12 12 * * *',async()=>{
-      const today = new Date()
-      let yesterday =  new Date()
-      yesterday.setDate(today.getDate() -1)
-      const latestReservations = await db.Reservation.findAll({where:{end_date:{[Op.lt]:today,[Op.gte]:yesterday},state:ReservationTypes.FINISHED},include:[{model:db.Employee,include:db.User},{model:db.Machine}]})
-      latestReservations.forEach(item=>{
-        const machine = item.Machine.name;
-        const email = item.Employee.User.email;
-        const endDate = new Date(item.end_date);
-        sendMessage(email,'Zbliżająca się rezerwacja',`Przypomnienie o wypełnieniu ankiety dotyczącej byłej rezerwacji na maszynę: ${machine}, która się zakończyła o ${endDate}`)
-      })
-    },{scheduled:true,timezone:"Europe/Warsaw"})
-    
-  }
+const cronSurveyReminder = async (db,Op)=>{
+  cron.schedule('12 12 * * *',async()=>{
+    const today = new Date()
+    let yesterday =  new Date()
+    yesterday.setDate(today.getDate() -1)
+    const latestReservations = await db.Reservation.findAll({where:{end_date:{[Op.lt]:today,[Op.gte]:yesterday},state:ReservationTypes.FINISHED},include:[{model:db.Employee,include:db.User},{model:db.Machine}]})
+    latestReservations.forEach(item=>{
+      const machine = item.Machine.name;
+      const email = item.Employee.User.email;
+      const endDate = new Date(item.end_date);
+      sendMessage(email,'Zbliżająca się rezerwacja',`Przypomnienie o wypełnieniu ankiety dotyczącej byłej rezerwacji na maszynę: ${machine}, która się zakończyła o ${endDate}`)
+    })
+  },{scheduled:true,timezone:"Europe/Warsaw"})
+  
+}
 const cronReservationStateChange = async(db,Op)=>{
     cron.schedule('0 22 * * *',async()=>{
       const today = new Date()
       let yesterday =  new Date()
       yesterday.setDate(today.getDate() -1)
       const latestReservations = await db.Reservation.findAll({where:{end_date:{[Op.lt]:today,[Op.gte]:yesterday}}})
-      latestReservations.forEach(async (item)=>{
-        await item.update({state:ReservationTypes.FINISHED})
+      latestReservations.forEach((item)=>{
+        item.update({state:ReservationTypes.FINISHED})
       })
     },{scheduled:true,timezone:"Europe/Warsaw"})
 }
+
+exports.newCronAction = (db,Op,eventEndDate,eventId) => {
+    let minute = eventEndDate.getMinutes().toString(), 
+    hour = eventEndDate.getHours().toString(), 
+    day = eventEndDate.getDate().toString(), 
+    month = eventEndDate.getMonth().toString(), 
+    year = eventEndDate.getFullYear().toString();
+    cron.schedule(`${minute} ${hour} ${day} ${month} *`,()=>{
+      db.Reservation.update({state:ReservationTypes.FINISHED, where:{id:eventId}})
+      
+    })
+}
   
+const setMonthlyStatisticsNewsLetter = () =>{
+  cron.schedule(`0 22 1 1-12 *`,()=>{
+
+  })
+}

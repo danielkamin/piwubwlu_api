@@ -1,5 +1,6 @@
 const db = require('../../database/models')
 const {DegreeValidation} = require('../Validation/resource')
+const logger = require('../Config/loggerConfig')
 exports.createDegree = async (req,res)=>{
     const { error } = DegreeValidation(req.body);
     if (error) return res.status(400).send(error.details[0].message);
@@ -10,7 +11,8 @@ exports.createDegree = async (req,res)=>{
         res.send({ ok: true });
     }catch(err)
     {
-        res.send(err.sql);
+        res.send(err);
+        logger.error({message: err, method: 'createDegree'})
     }
 }
 exports.updateDegree = async (req,res)=>{
@@ -27,6 +29,7 @@ exports.updateDegree = async (req,res)=>{
     }catch(err)
     {
         res.send(err.sql);
+        logger.error({message: err, method: 'updateDegree'})
     }
 }
 exports.removeDegree = async (req,res)=>{
@@ -35,7 +38,8 @@ exports.removeDegree = async (req,res)=>{
         res.send({ok:true});
     }catch(err)
     {
-        res.send(err.original.detail);
+        res.send(err);
+        logger.error({message: err, method: 'removeDegree'})
     }
 }
 exports.getAllDegree = async (req,res)=>{
@@ -44,7 +48,8 @@ exports.getAllDegree = async (req,res)=>{
         res.send(degrees)
     }catch(err)
     {
-        res.send(err.sql);
+        res.send(err);
+        logger.error({message: err, method: 'getAllDegree'})
     }
 }
 exports.getDegreeById = async (req,res)=>{
@@ -54,6 +59,7 @@ exports.getDegreeById = async (req,res)=>{
     }catch(err)
     {
         res.send(err.sql);
+        logger.error({message: err, method: 'getDegreeById'})
     }
 }
 exports.getDegreesList = async (req,res)=>{
@@ -62,6 +68,7 @@ exports.getDegreesList = async (req,res)=>{
         res.send(degrees)
     }catch(err)
     {
-        res.send(err.sql);
+        res.send(err);
+        logger.error({message: err, method: 'getDegreesList'})
     }
 }

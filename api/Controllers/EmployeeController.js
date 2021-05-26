@@ -2,7 +2,8 @@ const db = require( '../../database/models')
 const {roles} = require( '../Utils/constants')
 const { validatePassword } = require( '../Utils/helpers')
 const { EmployeeProfileValidation,guestProfileValidation} = require( '../Validation/auth')
-/* GET - User model fetch with Employee model left join */
+const logger = require('../Config/loggerConfig')
+
 exports.updateEmployee= async (req,res)=>{
    let userBody = {firstName:req.body.firstName,lastName:req.body.lastName,email:req.body.email}
    const {id} = req.params;
@@ -12,7 +13,7 @@ exports.updateEmployee= async (req,res)=>{
    if(user!==null && user.id!=req.params.id) return res.status(400).send('Podany e-mail już istnieje')
 
    try{
-      if(req.body.password!='')
+      if(req.body.password!=='')
       {
          userBody.password= await validatePassword(req,res);
          await db.User.update(userBody,{where:{id:id}})
@@ -20,6 +21,7 @@ exports.updateEmployee= async (req,res)=>{
       else{
          await db.User.update(userBody,{where:{id:id}})
       } 
+
       if(req.body.setEmployee===false){
          const guest = await db.Guest.create({userId:id,isVerified:true})
          const role = await db.Role.findOne({where:{role_name:roles[2]}})
@@ -30,7 +32,6 @@ exports.updateEmployee= async (req,res)=>{
          await db.Employee.destroy({where:{userId:id}});
       }
       else {
-         console.log(req.body)
          await db.Employee.update({
             departmentId:req.body.departmentId===0?null:+(req.body.departmentId),
             degreeId:req.body.degreeId===0?null:req.body.degreeId,
@@ -38,10 +39,12 @@ exports.updateEmployee= async (req,res)=>{
             room:req.body.room},
          {where:{userId:id}})
       }
+      
       res.send({ok:true})
    }catch(err)
    {
       res.send(err)
+      logger.error({message: err, method: 'updateEmployee'})
    }
 }
 exports.getEmployeeList = async(req,res)=>{
@@ -52,6 +55,7 @@ exports.getEmployeeList = async(req,res)=>{
    }catch(err)
    {
       res.send(err)
+      logger.error({message: err, method: 'getEmployeeList'})
    }
 }
 exports.getEmployeeById = async (req,res)=>{
@@ -63,7 +67,8 @@ exports.getEmployeeById = async (req,res)=>{
       include:[{model:db.Department},{model:db.Degree}]}]})
    res.send(employee)
  }catch(err){
-    res.send(err.sql);
+    res.send(err);
+    logger.error({message: err, method: 'getEmployeeById'})
  }
 }
 exports.updateEmployeeProfile = async (req,res)=>{
@@ -77,7 +82,8 @@ exports.updateEmployeeProfile = async (req,res)=>{
      },{where:{id:req.body.id}})
      res.send({ok:true})
    }catch(err){
-     return res.send(err);
+     res.send(err);
+     logger.error({message: err, method: 'updateEmployeeProfile'})
    }
 }
 exports.displayEmployees = async (req,res)=>{
@@ -91,7 +97,8 @@ exports.displayEmployees = async (req,res)=>{
    res.send(employees)
    }catch(err)
    {
-      res.send(err.sql)
+      res.send(err)
+      logger.error({message: err, method: 'displayEmployees'})
    }
 }
 exports.getAllEmployee = async (req,res)=>{
@@ -102,6 +109,7 @@ exports.getAllEmployee = async (req,res)=>{
       res.send(empList)
    }catch(err)
    {
-      res.send(err.sql)
+      res.send(err)
+      logger.error({message: err, method: 'getAllEmployee'})
    }
 }

@@ -1,13 +1,16 @@
-exports.roles = [
-    'ADMIN', 
-   'SUPERVISOR',
-   'EMPLOYEE',
-    'REGULAR', 
-  ]; 
+exports.UserRoles = {
+    ADMIN:'ADMIN', 
+    FACULTYHEAD:'FACULTYHEAD',
+    DEPARTMENTHEAD:'DEPARTMENTHEAD',
+   SUPERVISOR:'SUPERVISOR',
+   EMPLOYEE:'EMPLOYEE',
+    REGULAR:'REGULAR', 
+}; 
+
 exports.guestTypes = {
     admin:"ADMIN",
     guest:"GUEST",
-    employee:"EMPLOYEE"
+    employee:"EMPLOYEE",
   }
 
 exports.WEB_URL = 'http://77.46.45.243:3000';

@@ -80,3 +80,15 @@ exports.DegreeValidation = data=>{
   })
   return schema.validate(data)
 }
+
+exports.SMTPSettingsValidation = data =>{
+  const schema = Joi.object({
+    host: Joi.string().max(40).required(),
+    user:Joi.string().max(50).required(),
+    pass:Joi.string().max(250).required(),
+    port:Joi.number(),
+    secure:Joi.boolean(),
+    requireTLS:Joi.boolean(),
+  })
+  return schema.validate(data)
+}

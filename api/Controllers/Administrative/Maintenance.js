@@ -1,4 +1,5 @@
-const logger = require('../Config/loggerConfig')
+const logger = require('../../Config/loggerConfig')
+const path = require('path')
 
 exports.getErrorLogFile = async (req,res)=>{
     try{

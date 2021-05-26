@@ -4,6 +4,8 @@ const {promisify} = require('util')
 const bcrypt = require('bcrypt')
 const { newPasswordValidation } = require('../Validation/auth')
 const unlinkAsync = promisify(fs.unlink) // unlink when deleting image
+const logger = require('../Config/loggerConfig')
+
 exports.deleteUser = async (req, res) => {
   console.log(req.params.id)
   const user = await db.User.findByPk(req.params.id);
@@ -16,6 +18,7 @@ exports.deleteUser = async (req, res) => {
     res.status(200).send('User deleted successfully');
   } catch (err) {
     res.send(err.detail);
+    logger.error({message: err, method: 'deleteUser'})
   }
 }
 
@@ -34,7 +37,8 @@ exports.changePassword = async (req, res) => {
     );
     res.send({ok:true});
   } catch (err) {
-    return res.send(err);
+    res.send(err);
+    logger.error({message: err, method: 'changePassword'})
   }
 }
 
@@ -46,7 +50,8 @@ exports.getProfileInfo =async(req,res)=>{
     return res.send(user)
   }catch(err)
   {
-    return res.send(err.sql);
+    res.send(err.sql);
+    logger.error({message: err, method: 'getProfileInfo'})
   }
 }
 exports.uploadProfilePicture = async (req,res)=>{
@@ -80,5 +85,6 @@ exports.updateProfileInfo = async(req,res)=>{
       res.send({ok:true})
   }catch(err){
     res.send(err)
+    logger.error({message: err, method: 'uploadProfilePicture'})
   }
 }

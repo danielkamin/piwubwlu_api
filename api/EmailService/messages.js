@@ -55,3 +55,7 @@ exports.sendToDepartmentHeadMessage = async (reservation)=>{
         do: ${new Date(departmentHeadMessage.end_date).toLocaleString('pl-PL')},
         uprasza się przesłać tę wiadomość do jednej z wybranych osób nadzorujących tę aparaturę.`)
 }
+
+exports.sendMonthlyStatistics = ()=>{
+  
+}

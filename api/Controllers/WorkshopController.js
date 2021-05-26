@@ -3,6 +3,7 @@ const supervisorCheck = require('../Utils/supervisorCheck')
 const db = require("../../database/models")
 const {  WorkshopValidation } = require('../Validation/resource')
 const Op = db.Sequelize.Op;
+const logger = require('../Config/loggerConfig')
 Array.prototype.move = function (from,to) {
   this.splice(to, 0, this.splice(from, 1)[0]);
 }
@@ -33,6 +34,7 @@ exports.createWorkshop = async (req, res) => {
     res.send({ id: workshop.id });
   } catch (err) {
     res.send(err.sql);
+    logger.error({message: err, method: 'createWorkshop'})
   }
 };
 exports.removeWorkshop = async (req, res) => {
@@ -55,6 +57,7 @@ exports.removeWorkshop = async (req, res) => {
     res.send({ok:true});
   } catch (err) {
     res.send(err);
+    logger.error({message: err, method: 'removeWorkshop'})
   }
 };
 exports.getAllWorkshop = async (req, res) => {
@@ -63,6 +66,7 @@ exports.getAllWorkshop = async (req, res) => {
     res.send(workshops);
   } catch (err) {
     res.send(err);
+    logger.error({message: err, method: 'getAllWorkshop'})
   }
 };
 exports.updateWorkshop = async (req, res) => {
@@ -101,6 +105,7 @@ exports.updateWorkshop = async (req, res) => {
     res.send({ id: id });
   } catch (err) {
     res.send(err.sql);
+    logger.error({message: err, method: 'updateWorkshop'})
   }
 };
 exports.getWorkshopById = async (req, res) => {
@@ -117,6 +122,7 @@ exports.getWorkshopById = async (req, res) => {
     res.send(workshopQuery);
   } catch (err) {
     res.send(err.sql);
+    logger.error({message: err, method: 'getWorkshopById'})
   }
 };
 exports.getWorkshopsList = async (req, res) => {
@@ -128,6 +134,7 @@ exports.getHelperNamesWorkshops = async(req,res)=>{
     res.send(workshops);
   } catch (err) {
     res.send(err);
+    logger.error({message: err, method: 'getHelperNamesWorkshops'})
   }
 }
 exports.getWorkshopReservations = async (req,res)=>{
@@ -137,5 +144,6 @@ exports.getWorkshopReservations = async (req,res)=>{
     res.send(resourcesWithEvents)
   }catch(err){
     res.send(err)
+    logger.error({message: err, method: 'getWorkshopReservations'})
   }
 }

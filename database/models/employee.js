@@ -9,9 +9,10 @@ module.exports = (sequelize, DataTypes) => {
       Employee.belongsTo(models.Degree,{foreignKey:'degreeId'})
       Employee.belongsTo(models.User,{foreignKey:'userId',onDelete:'CASCADE'})
       Employee.belongsToMany(models.Workshop,{through:'WorkshopSupervisors'})
-      Employee.hasOne(models.Lab,{foreignKey:'employeeId'})
-      Employee.hasOne(models.Department,{foreignKey:'employeeId'})
       Employee.hasOne(models.Reservation,{foreignKey:'employeeId'})
+      Employee.hasOne(models.MachineService,{foreignKey:'employeeId'})
+      Employee.hasOne(models.DepartmentHead,{foreignKey:'employeeId'});
+      Employee.hasOne(models.FacultyAuthorities,{foreignKey:'employeeId'})
     }
   };
   Employee.init({

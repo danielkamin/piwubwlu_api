@@ -9,7 +9,6 @@ const {dbConnect} = require( './api/Config/dbConnect')
 const {configExpress} = require( './api/Config/config')
 const session = require('express-session');
 const helmet = require("helmet");
-
 //root path to application
 global.__basedir = __dirname;
 dbConnect(db.sequelize);
@@ -42,9 +41,9 @@ app.use('/api/user',Routes.userRouter)
 app.use('/api/guests',Routes.guestRouter)
 app.use('/api/utils',Routes.utilsRouter)
 app.use('/api/degrees',Routes.degreeRouter)
-app.use('/api/cas',Routes.CASRouter)
 app.use('/api/stats',Routes.statsRouter)
 app.use('/api/maintenance',Routes.maintenanceRouter)
+app.use(Routes.CASRouter)
 
 
 const port = process.env.PORT || 5000;
@@ -52,10 +51,11 @@ const port = process.env.PORT || 5000;
 logger.log({
   level: 'info',
   message: 'Re-start of the app'});
-// app.listen(port, () => {
-//   console.log(`Resource Server is running on port ${port}`);
-// });
 
-https.createServer(options, app).listen(port,() => {
-  console.log('Server listening on port ' + port);
+app.listen(port, () => {
+  console.log(`Resource Server is running on port ${port}`);
 });
+
+// https.createServer(options, app).listen(port,() => {
+//   console.log('Server listening on port ' + port);
+// });

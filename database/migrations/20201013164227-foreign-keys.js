@@ -7,81 +7,117 @@ module.exports = {
       references: { model: 'Users', key: 'id' },
       onDelete: 'CASCADE',
     }),
-    queryInterface.addColumn('Employees','degreeId',{
+    await queryInterface.addColumn('Employees','degreeId',{
       type: Sequelize.INTEGER,
       references: { model: 'Degrees', key: 'id' },
       onDelete: 'SET NULL',
     })
-    queryInterface.addColumn('Workshops','labId',{
+    await queryInterface.addColumn('Workshops','labId',{
       type: Sequelize.INTEGER,
       references: { model: 'Labs', key: 'id' },
       onDelete:'SET NULL'
     }),
-    queryInterface.addColumn('ReservationSurveys','reservationId',{
+    await queryInterface.addColumn('ReservationSurveys','reservationId',{
       type: Sequelize.INTEGER,
       references: { model: 'Reservations', key: 'id' },
       onDelete: 'CASCADE',
     }),
-    queryInterface.addColumn('ResetTokens','userId',{
+    await queryInterface.addColumn('ResetTokens','userId',{
       type: Sequelize.INTEGER,
       references: { model: 'Users', key: 'id' },
       onDelete: 'CASCADE',
     }),
-    queryInterface.addColumn('Reservations','machineId',{
+    await queryInterface.addColumn('Reservations','machineId',{
       type: Sequelize.INTEGER,
       references: { model: 'Machines', key: 'id' },
       onDelete:'SET NULL'
     }),
-    queryInterface.addColumn('Guests','userId',{
+    await queryInterface.addColumn('Guests','userId',{
       type: Sequelize.INTEGER,
       references: { model: 'Users', key: 'id' },
       onDelete: 'CASCADE',
     }),
-    queryInterface.addColumn('UserRoles','userId',{
+    await queryInterface.addColumn('UserRoles','userId',{
       type: Sequelize.INTEGER,
       references: { model: 'Users', key: 'id' },
       onDelete: 'CASCADE',
     }),
-    queryInterface.addColumn('UserRoles','roleId',{
+    await queryInterface.addColumn('UserRoles','roleId',{
       type: Sequelize.INTEGER,
       references: { model: 'Roles', key: 'id' },
       onDelete: 'CASCADE',
     })
-    queryInterface.addColumn('Machines','workshopId',{
+    await queryInterface.addColumn('Machines','workshopId',{
       type: Sequelize.INTEGER,
       references: { model: 'Workshops', key: 'id' },
       onDelete: 'SET NULL',
     })
-    queryInterface.addColumn('ReservationDeclineComments','reservationId',{
+    await queryInterface.addColumn('ReservationDeclineComments','reservationId',{
       type: Sequelize.INTEGER,
       references: { model: 'Reservations', key: 'id' },
       onDelete: 'CASCADE',
     }),
-    await queryInterface.addColumn('Departments','employeeId',{
+    await queryInterface.addColumn('ReservationRequestComments','reservationId',{
       type: Sequelize.INTEGER,
-      references: { model: 'Employees', key: 'id' },
-      onDelete: 'SET NULL',
+      references: { model: 'Reservations', key: 'id' },
+      onDelete: 'CASCADE',
     }),
     await queryInterface.addColumn('Labs','departmentId',{
       type: Sequelize.INTEGER,
       references: { model: 'Departments', key: 'id' },
       onDelete: 'SET NULL',
+    }),
+    await queryInterface.addColumn('MachineServices','machineId',{
+      type: Sequelize.INTEGER,
+      references: { model: 'Machines', key: 'id' },
+      onDelete:'SET NULL'
+    }),
+    await queryInterface.addColumn('MachineServices','employeeId',{
+      type: Sequelize.INTEGER,
+      references: { model: 'Employees', key: 'id' },
+      onDelete:'SET NULL'
+    }),
+    await queryInterface.addColumn('DepartmentHeads','departmentId',{
+      type: Sequelize.INTEGER,
+      references: { model: 'Departments', key: 'id' },
+      onDelete:'CASCADE'
+    }),
+    await queryInterface.addColumn('DepartmentHeads','employeeId',{
+      type: Sequelize.INTEGER,
+      references: { model: 'Employees', key: 'id' },
+      onDelete:'SET NULL'
+    })
+    await queryInterface.addColumn('FacultyAuthorities','employeeId',{
+      type: Sequelize.INTEGER,
+      references: { model: 'Employees', key: 'id' },
+      onDelete:'CASCADE'
+    })
+    await queryInterface.addColumn('EmailLogs','reservationId',{
+      type: Sequelize.INTEGER,
+      references: { model: 'Reservations', key: 'id' },
+      onDelete:'SET NULL'
     })
   },
 
   down: async (queryInterface, Sequelize) => {
-      queryInterface.removeColumn('Employees', 'userId'),
-      queryInterface.removeColumn('Employees', 'degreeId'),
-      queryInterface.removeColumn('Workshops', 'labId'),
-      queryInterface.removeColumn('ReservationSurveys', 'reservationId'),
-      queryInterface.removeColumn('ResetTokens', 'userId'),
-      queryInterface.removeColumn('Reservations', 'machineId'),
-      queryInterface.removeColumn('Guests', 'userId'),
-      queryInterface.removeColumn('UserRoles', 'userId'),
-      queryInterface.removeColumn('UserRoles', 'roleId'),
-      queryInterface.removeColumn('Machines', 'workshopId')
-      queryInterface.removeColumn('ReservationDeclineComments','reservationId'),
-      await queryInterface.removeColumn('Departments', 'employeeId'),
-      await queryInterface.removeColumn('Labs', 'departmentId')
+    await queryInterface.removeColumn('Employees', 'userId'),
+    await queryInterface.removeColumn('Employees', 'degreeId'),
+    await queryInterface.removeColumn('Workshops', 'labId'),
+    await queryInterface.removeColumn('ReservationSurveys', 'reservationId'),
+    await queryInterface.removeColumn('ResetTokens', 'userId'),
+    await queryInterface.removeColumn('Reservations', 'machineId'),
+    await queryInterface.removeColumn('Guests', 'userId'),
+    await queryInterface.removeColumn('UserRoles', 'userId'),
+    await queryInterface.removeColumn('UserRoles', 'roleId'),
+    await queryInterface.removeColumn('Machines', 'workshopId')
+    await queryInterface.removeColumn('ReservationDeclineComments','reservationId'),
+    await queryInterface.removeColumn('ReservationRequestComments','reservationId'),
+    await queryInterface.removeColumn('Labs', 'departmentId'),
+    await queryInterface.removeColumn('MachineServices', 'machineId')
+    await queryInterface.removeColumn('MachineServices', 'employeeId')
+    await queryInterface.removeColumn('DepartmentHeads', 'departmentId')
+    await queryInterface.removeColumn('DepartmentHeads', 'employeeId')
+    await queryInterface.removeColumn('FacultyAuthorities', 'employeeId')
+    await queryInterface.removeColumn('EmailLogs', 'reservationId')
   }
 };

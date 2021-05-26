@@ -10,4 +10,4 @@ COPY .sequelizerc .
 COPY .env .
 COPY --from=builder /app/uploads ./uploads
 EXPOSE 5000
-CMD ["npm","start"]
+CMD ["npm","run","docker"]

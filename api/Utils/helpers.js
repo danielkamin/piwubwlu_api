@@ -15,3 +15,6 @@ exports = validatePassword = async (req,res)=>{
     return hashedPassword;
  }
  
+exports.emptyStringToNull =(data)=>{
+    return data !=='' ? data : null
+}

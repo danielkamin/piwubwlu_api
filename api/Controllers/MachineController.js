@@ -4,6 +4,8 @@ const {sendMessage} = require('../EmailService/config')
 const {sendMachineSuspendedEmails} = require('../EmailService/messages')
 const { MachineValidation } = require('../Validation/resource')
 const Op = db.Sequelize.Op;
+const logger = require('../Config/loggerConfig')
+
 exports.createMachine = async (req, res) => {
   const values = {
     name: req.body.name,
@@ -14,13 +16,16 @@ exports.createMachine = async (req, res) => {
     additionalInfo:req.body.additionalInfo,
     workshopId: req.body.workshopId
   }
+
   const { error } = MachineValidation(values);
   if (error) return res.status(400).send(error.details[0].message);
+
   try {
     const machine = await db.Machine.create(values);
     res.send({ id: machine.id });
   } catch (err) {
-    res.send(err.sql);
+    res.send(err);
+    logger.error({message: err, method: 'getGuestList'})
   }
 };
 exports.removeMachine = async (req, res) => {
@@ -30,7 +35,8 @@ exports.removeMachine = async (req, res) => {
     await db.Machine.destroy({ where: { id: req.params.id } }); 
     res.send({ok:true});
   } catch (err) {
-    res.send(err.sql);
+    res.send(err);
+    logger.error({message: err, method: 'getGuestList'})
   }
 };
 exports.updateMachine = async (req, res) => {
@@ -59,7 +65,8 @@ exports.updateMachine = async (req, res) => {
     
     res.send({ id: machine.id });
   } catch (err) {
-    res.send(err.sql);
+    res.send(err);
+    logger.error({message: err, method: 'getGuestList'})
   }
 };
 exports.getAllMachine = async (req, res) => {
@@ -69,6 +76,7 @@ exports.getAllMachine = async (req, res) => {
     res.send(machines);
   } catch (err) {
     res.send(err);
+    logger.error({message: err, method: 'getGuestList'})
   }
 };
 exports.getMachineById = async (req, res) => {

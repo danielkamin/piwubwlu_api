@@ -21,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
     firstName:DataTypes.STRING,
     lastName:DataTypes.STRING,
     password:DataTypes.STRING,
-    picturePath:DataTypes.STRING
+    imagePath:DataTypes.STRING
   }, {
     sequelize,
     modelName: 'User',
