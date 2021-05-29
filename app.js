@@ -43,6 +43,8 @@ app.use('/api/utils',Routes.utilsRouter)
 app.use('/api/degrees',Routes.degreeRouter)
 app.use('/api/stats',Routes.statsRouter)
 app.use('/api/maintenance',Routes.maintenanceRouter)
+app.use('/api/smtp',Routes.smtpRouter)
+app.use('/api/department_head',Routes.departmentHeadRouter)
 app.use(Routes.CASRouter)
 
 
@@ -52,10 +54,10 @@ logger.log({
   level: 'info',
   message: 'Re-start of the app'});
 
-app.listen(port, () => {
-  console.log(`Resource Server is running on port ${port}`);
-});
-
-// https.createServer(options, app).listen(port,() => {
-//   console.log('Server listening on port ' + port);
+// app.listen(port, () => {
+//   console.log(`Resource Server is running on port ${port}`);
 // });
+
+https.createServer(options, app).listen(port,() => {
+  console.log('Server listening on port ' + port);
+});
