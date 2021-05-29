@@ -1,12 +1,10 @@
 const db = require('../../database/models')
 const { LabValidation } = require('../Validation/resource')
-const supervisorCheck = require('../Utils/supervisorCheck')
 const {emptyStringToNull} = require('../Utils/helpers')
 const logger = require('../Config/loggerConfig')
 exports.createLab = async (req, res) => {
   const { error } = LabValidation(req.body);
   if (error) return res.status(400).send(error.details[0].message);
-  let empId = req.body.employeeId!==''?req.body.employeeId:null
   try {
     const lab = await db.Lab.create({
       name: req.body.name,

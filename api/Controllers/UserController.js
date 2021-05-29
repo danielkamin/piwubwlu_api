@@ -57,10 +57,10 @@ exports.getProfileInfo =async(req,res)=>{
 exports.uploadProfilePicture = async (req,res)=>{
   const user = await db.User.findByPk(req.user.id);
   
-    if(user.picturePath !== null){
-      await unlinkAsync(user.picturePath)
+    if(user.imagePath !== null){
+      await unlinkAsync(user.imagePath)
     }
-    await db.User.update({picturePath:req.file.path},{where:{id:user.id}})
+    await db.User.update({imagePath:req.file.path},{where:{id:user.id}})
     const temp = await db.User.findByPk(user.id)
     res.send({ok:true})
  
@@ -76,7 +76,7 @@ exports.updateProfileInfo = async(req,res)=>{
 
     if(req.body.employee===true){ 
       await db.Employee.update({
-        information:req.body.information,
+        knowledgeBaseUrl:req.body.knowledgeBaseUrl,
         telephone:req.body.telephone,
         room:req.body.room,
         degreeId:req.body.degreeId===0?null:req.body.degreeId,},

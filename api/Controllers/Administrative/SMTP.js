@@ -8,14 +8,26 @@ exports.setSMTPSettings = async (req,res)=>{
         const {error} = SMTPSettingsValidation(values)
         if (error) return res.status(400).send(error.details[0].message);
         const oldSMTPSettings = await db.SMTP_Settings.findAll({limit:1})
-        await db.SMTP_Settings.update({
-            user: values.user,
-            pass: values.password,
-            host: values.host,
-            requireTLS: values.requireTLS?values.requireTLS:false ,
-            sequre: values.requireTLS?values.requireTLS:false,
-            port: values.port?values.port:465
-        },{ where: { id: oldSMTPSettings[0].id } })
+        if(oldSMTPSettings.length){
+            await db.SMTP_Settings.update({
+                user: values.user,
+                pass: values.pass,
+                host: values.host,
+                requireTLS: values.requireTLS?values.requireTLS:false ,
+                sequre: values.requireTLS?values.requireTLS:false,
+                port: values.port?values.port:465
+            },{ where: { id: oldSMTPSettings[0].id } })
+        }else{
+            await db.SMTP_Settings.create({
+                user: values.user,
+                pass: values.pass,
+                host: values.host,
+                requireTLS: values.requireTLS?values.requireTLS:false ,
+                sequre: values.requireTLS?values.requireTLS:false,
+                port: values.port?values.port:465
+            })
+        }
+        
         res.send({ok:true});
     }catch(err){
         res.send(err);

@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   Employee.init({
-    information: DataTypes.JSON,
+    knowledgeBaseUrl: DataTypes.STRING,
     position:DataTypes.STRING,
     telephone:DataTypes.STRING,
     room:DataTypes.STRING,

@@ -52,3 +52,4 @@ exports.getPersonalStatistics = async (req, res) => {
   });
   res.send(groupArrays)
 }
+

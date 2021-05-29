@@ -16,12 +16,8 @@ function uploadImage(model){
 function deleteImage(model){
   return async (req,res,next)=>{
     const tempModel = await model.findByPk(req.body.id)
-    //user.imagePath!!!!
-
-      if(tempModel.imagePath !== null ||tempModel.picturePath!==null){
-        if(tempModel.imagePath!==undefined) await unlinkAsync(tempModel.imagePath)
-        else if( tempModel.picturePath!==undefined ) await unlinkAsync(tempModel.picturePath)
-        
+      if(tempModel.imagePath !== null ){
+        await unlinkAsync(tempModel.imagePath) 
       }
       await model.update({imagePath:null},{where:{id:tempModel.id}})
       res.send({ok:true})

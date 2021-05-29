@@ -1,5 +1,5 @@
 
-const {getErrorLogFile,getInfoLogFile} = require('../Controllers/Maintenance')
+const {getErrorLogFile,getInfoLogFile} = require('../Controllers/Administrative/Maintenance')
 const express =require('express')
 const maintenanceRouter = express.Router();
 

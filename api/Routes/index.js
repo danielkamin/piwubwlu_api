@@ -13,10 +13,12 @@ const CASRouter = require('./cas')
 const statsRouter = require('./stats')
 const workshopTypeRouter = require( './workshopType')
 const maintenanceRouter = require('./maintenance')
+const smtpRouter = require('./smtp')
+const departmentHeadRouter = require('./departmentHead')
 module.exports = {
     labRouter,machineRouter,workshopRouter,
     departmentRouter,employeeRouter,rentalRouter,
     authRouter,userRouter,utilsRouter,guestRouter,degreeRouter,
     CASRouter,statsRouter,workshopRouter,workshopTypeRouter,
-    maintenanceRouter
+    maintenanceRouter,smtpRouter,departmentHeadRouter
 }

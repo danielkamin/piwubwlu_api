@@ -14,11 +14,6 @@ module.exports = {
       english_name: {
         type: Sequelize.STRING(60)
       },
-      employeeId:{
-        type: Sequelize.INTEGER,
-        references: { model: 'Employees', key: 'id' },
-        onDelete:'SET NULL'
-      },
       additionalInfo:{
         type: Sequelize.JSONB
       },

@@ -17,7 +17,8 @@ exports.MachineValidation = (data) => {
     maxUnit:Joi.number().min(1).max(48).required(),
     machineState: Joi.boolean().required(),
     workshopId: Joi.number().required(),
-    additionalInfo:Joi.any()
+    additionalInfo:Joi.any(),
+    delayTime:Joi.number()
   });
   return schema.validate(data);
 };
@@ -26,7 +27,6 @@ exports.LabValidation = (data) => {
     id:Joi.number(),
     name: Joi.string().min(4).max(60).required(),
     english_name: Joi.string().min(4).max(60),
-    employeeId:Joi.any(),
     additionalInfo:Joi.any()
   });
   return schema.validate(data);
@@ -43,7 +43,7 @@ exports.WorkshopValidation = (data) => {
   });
   return schema.validate(data);
 };
-exports.ReservationValidation = (data) => {
+exports.EventValidation = (data) => {
   const schema = Joi.object({
     start_date: Joi.date().iso().required(),
     end_date: Joi.date().iso().min(Joi.ref('start_date')),
@@ -54,7 +54,7 @@ exports.ReservationValidation = (data) => {
 };
 exports.EmployeeProfileValidation = (data)=>{
   const schema = Joi.object({
-    information: Joi.any()
+    knowledgeBaseUrl: Joi.string()
   })
   return schema.validate(data)
 }

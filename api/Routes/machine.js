@@ -9,11 +9,14 @@ const {uploadImage,deleteImage} = require('../Middlewares/imageHandler')
 const {
     createMachine,
     updateMachine,
-    removeMachine,
+    removeMachine,getMachineServices,createMachineService,
     getAllMachine, getMachineById,getMachineList,getMachineSupervisors
   } =require('../Controllers/MachineController')
 const {getMachineReservation} =require('../Controllers/ReservationController')
 const machineRouter = express.Router();
+
+machineRouter.post('/service/:id',  createMachineService);
+machineRouter.get('/service/:id',  getMachineServices);
 machineRouter.post('/',verifyAccessToken,authorizeAdmin,createMachine);
 machineRouter.put('/:id',verifyAccessToken,authorizeAdmin,updateMachine);
 machineRouter.delete('/:id',verifyAccessToken,authorizeAdmin,removeMachine);
@@ -24,4 +27,5 @@ machineRouter.get('/supervisors/:id',  getMachineSupervisors);
 machineRouter.get('/rent/:id',verifyAccessToken,getMachineReservation);
 machineRouter.post('/upload_image',verifyAccessToken,upload.single('image'),uploadImage(db.Machine))
 machineRouter.post('/delete_image',verifyAccessToken,deleteImage(db.Machine))
+
 module.exports = machineRouter;

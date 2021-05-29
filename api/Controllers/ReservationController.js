@@ -3,7 +3,7 @@ const {sendSupervisorEmails,sendToDepartmentHeadMessage} = require('../EmailServ
 const {sendMessage} = require('../EmailService/config')
 const { ReservationValidation } = require('../Validation/resource')
 const uniqBy = require('lodash/uniqBy')
-const {ReservationTypes} = require('../Utils/translations')
+const {EventValidation} = require('../Utils/translations')
 const logger = require('../Config/loggerConfig')
 const Op = db.Sequelize.Op;
 
@@ -16,10 +16,11 @@ exports.createReservation = async (req, res) => {
 
   data.employeeId = employee.id;
 
-  const { error } = ReservationValidation(data);
+  const { error } = EventValidation(data);
   if (error) return res.status(400).send(error.details[0].message);
 
   try {
+    
     const reservation = await db.Reservation.create({
       state:ReservationTypes.PENDING,
       start_date:data.start_date,
@@ -27,6 +28,13 @@ exports.createReservation = async (req, res) => {
       employeeId:data.employeeId,
       machineId:data.machineId});
 
+    if(req.body.comment){
+      await db.ReservationRequestComment.create({
+        reservationId:reservation.id,
+        comment:req.body.comment
+      })
+    }
+  
     res.on('finish',function(){
       sendSupervisorEmails(data.machineId,db,'Nowa rezerwacja w systemie',
       `Została złożona nowa rezerwacja na maszynę: ${machine.name}.
@@ -47,6 +55,7 @@ exports.createReservation = async (req, res) => {
   }
 };
 exports.updateReservation = async(req,res)=>{
+  const id = req.params.id
   let data = req.body;
   let employee = await db.Employee.findOne({where:{userId:req.user.id},include:db.User})
   const machine = await db.Machine.findByPk(data.machineId)
@@ -62,9 +71,16 @@ exports.updateReservation = async(req,res)=>{
       end_date:data.end_date,
       employeeId:data.employeeId,
       machineId:data.machineId
-    },{where:{id:req.params.id}})
-    await db.ReservationDeclineComment.destroy({where:{reservationId:req.params.id}})
+    },{where:{id:id}})
+    await db.ReservationDeclineComment.destroy({where:{reservationId:id}})
 
+    if(req.body.comment){
+      await db.ReservationRequestComment.create({
+        reservationId:id,
+        comment:req.body.comment
+      })
+    }
+    
     res.on('finish',function(){
       sendSupervisorEmails(data.machineId,db,'Rezerwacja - aktualizacja',
       `Aktualizacja rezerwacji na maszynę: ${machine.name}.
@@ -144,24 +160,12 @@ exports.getMachineReservation = async (req, res) => {
 exports.getAllSupervisedReservation = async (req,res)=>{ 
   const userId = req.user.id;
     const employee = await db.Employee.findOne({where:{userId:userId},include:{model:db.Lab}})
-    let labSupervised = []
   try{
-    
-    if(employee.Lab!==null){
-      labSupervised = 
-    await db.Reservation.findAll({attributes:['id','state','start_date','end_date',],include:
-    {model:db.Machine,attributes:['id','name','english_name'],required:true,include:
-    {model:db.Workshop,attributes:['id','name','english_name'],required:true,where:{labId:employee.Lab.id}}}})
-  }
     const workshopSupervised = await db.Reservation.findAll({attributes:['id','state','start_date','end_date',],include:
     {model:db.Machine,attributes:['id','name','english_name'],required:true,include:
     {model:db.Workshop,attributes:['id','name','english_name'],required:true,include:{model:db.Employee,where:{userId:userId}}}}});
 
-    let tempArray = [];
-    tempArray.push(...labSupervised)
-    tempArray.push(...workshopSupervised)
-    let unique = uniqBy(tempArray,'id');
-    res.send(unique)
+    res.send(workshopSupervised)
   }catch(err){
     res.send(err)
     logger.error({message: err, method: 'getAllSupervisedReservation'})

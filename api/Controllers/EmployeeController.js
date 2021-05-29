@@ -1,7 +1,8 @@
 const db = require( '../../database/models')
 const {roles} = require( '../Utils/constants')
 const { validatePassword } = require( '../Utils/helpers')
-const { EmployeeProfileValidation,guestProfileValidation} = require( '../Validation/auth')
+const { guestProfileValidation} = require( '../Validation/auth')
+const { EmployeeProfileValidation} = require( '../Validation/resource')
 const logger = require('../Config/loggerConfig')
 
 exports.updateEmployee= async (req,res)=>{
@@ -76,7 +77,7 @@ exports.updateEmployeeProfile = async (req,res)=>{
    if(error) return res.status(400).send(error.details[0].message);
    try{
      await db.Employee.update({
-      information:req.body.information,
+      knowledgeBaseUrl:req.body.knowledgeBaseUrl,
       departmentId:req.body.departmentId,
       degreeId:req.body.degreeId,
      },{where:{id:req.body.id}})

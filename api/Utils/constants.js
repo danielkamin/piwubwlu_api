@@ -11,10 +11,23 @@ exports.guestTypes = {
     admin:"ADMIN",
     guest:"GUEST",
     employee:"EMPLOYEE",
-  }
+}
+exports.ReservationState = {
+  FINISHED:'FINISHED',
+  PENDING:'PENDING',
+  ACCEPTED:'ACCEPTED',
+  DECLINED:'DECLINED',
+  REVIEW:'REVIEW'
+}
 
-exports.WEB_URL = 'http://77.46.45.243:3000';
-exports.WEB_URL_NOPORT = 'http://77.46.45.243';
+exports.ReservationSugestedState = {
+  CORRECT:'CORRECT',
+  ACCEPTED:'ACCEPTED',
+  DECLINED:'DECLINED'
+}
+
+exports.WEB_URL = 'https://localhost:3000';
+exports.WEB_URL_NOPORT = 'https://localhost';
 exports.RentInterval = Object.freeze({
   15:'15',30:'30',45:'45',60:'60'
   })

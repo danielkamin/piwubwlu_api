@@ -13,8 +13,8 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   Reservation.init({
-    state: DataTypes.ENUM('FINISHED','PENDING','ACCEPTED','DECLINED'),
-    sugestedState:DataTypes.ENUM('NONE','ACCEPTED','DECLINED'),
+    state: DataTypes.ENUM('FINISHED','PENDING','ACCEPTED','DECLINED','REVIEW'),
+    sugestedState:DataTypes.ENUM('CORRECT','ACCEPTED','DECLINED'),
     start_date: DataTypes.DATE,
     end_date: DataTypes.DATE
   }, {

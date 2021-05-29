@@ -13,8 +13,8 @@ module.exports = {
         references: { model: 'Departments', key: 'id' },
         onDelete:'SET NULL'
       },
-      information: {
-        type: Sequelize.JSONB
+      knowledgeBaseUrl: {
+        type: Sequelize.STRING
       },
       position:{
         type:Sequelize.STRING(20)

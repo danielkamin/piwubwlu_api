@@ -67,18 +67,18 @@ exports.login = async (req, res) => {
   if (!user) return res.status(400).send('E-mail lub hasło są nieprawidłowe');
   validatePassAndResult(req,res,user,false);
 };
-  exports.adminLogin = async (req,res)=>{
-    const { error } = loginValidation(req.body);
-    if (error) return res.status(400).send(error.details[0].message);
-    const user = await db.User.findOne({ where: { email: req.body.email,userType:"ADMIN" } });
-    if (!user) return res.status(400).send('Nazwa użytkownika lub hasło są nieprawidłowe');
-    validatePassAndResult(req,res,user,false)
-  }
-  exports.logout = async (req, res) => {
-    res.clearCookie('token').send('Logged out');
-    
-  };
-  exports.adminLogout = async (req, res) => {
-    res.clearCookie('adminToken').send('Logged out');
-    
-  };
+exports.adminLogin = async (req,res)=>{
+  const { error } = loginValidation(req.body);
+  if (error) return res.status(400).send(error.details[0].message);
+  const user = await db.User.findOne({ where: { email: req.body.email,userType:"ADMIN" } });
+  if (!user) return res.status(400).send('Nazwa użytkownika lub hasło są nieprawidłowe');
+  validatePassAndResult(req,res,user,false)
+}
+exports.logout = async (req, res) => {
+  res.clearCookie('token').send('Logged out');
+  
+};
+exports.adminLogout = async (req, res) => {
+  res.clearCookie('adminToken').send('Logged out');
+  
+};

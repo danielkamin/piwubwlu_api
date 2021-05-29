@@ -14,6 +14,10 @@ const emailSettings = nodemailer.createTransport({
     pass: process.env.MAIL_PASSWORD,
   }
 });
+
+const FormatTextToHtml = (text)=>{
+  return `<p>${text}</p>`
+}
 exports.verifyTransport = ()=>{
   emailSettings.verify(function(error, success) {
     if (error) {
@@ -37,8 +41,7 @@ exports.sendMessage = (email, subject, messageBody,html)=>{
       from: process.env.MAIL_USER,
       to: email,
       subject: "Testy platformy!! "+subject,
-      text: messageBody,
-      html:html
+      html:FormatTextToHtml(messageBody)
     };
     if(html)
       message.html = messageBody +'<br/>' + html;
@@ -53,3 +56,4 @@ exports.sendMessage = (email, subject, messageBody,html)=>{
       }
     });
 }
+

@@ -11,6 +11,9 @@ module.exports = {
       role_name: {
         type: Sequelize.STRING(20)
       },
+      role_name: {
+        type: Sequelize.STRING(100)
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

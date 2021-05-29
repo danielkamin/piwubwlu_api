@@ -2,7 +2,7 @@ const db = require('../../database/models')
 const _ = require("lodash");
 const {sendMessage} = require('../EmailService/config')
 const {sendMachineSuspendedEmails} = require('../EmailService/messages')
-const { MachineValidation } = require('../Validation/resource')
+const { MachineValidation , EventValidation} = require('../Validation/resource')
 const Op = db.Sequelize.Op;
 const logger = require('../Config/loggerConfig')
 
@@ -14,7 +14,8 @@ exports.createMachine = async (req, res) => {
     maxUnit: req.body.maxUnit,
     machineState: req.body.machineState,
     additionalInfo:req.body.additionalInfo,
-    workshopId: req.body.workshopId
+    workshopId: req.body.workshopId,
+    delayTime:req.body.delayTime
   }
 
   const { error } = MachineValidation(values);
@@ -49,7 +50,8 @@ exports.updateMachine = async (req, res) => {
     maxUnit: req.body.maxUnit,
     machineState: req.body.machineState,
     additionalInfo:req.body.additionalInfo,
-    workshopId: req.body.workshopId
+    workshopId: req.body.workshopId,
+    delayTime:req.body.delayTime
   }
   const { error } = MachineValidation(values);
   if (error) return res.status(400).send(error.details[0].message);
@@ -99,4 +101,34 @@ exports.getMachineSupervisors = async (req,res)=>{
 }
 exports.getMachineList = async (req,res)=>{
   res.send(res.filteredResults);
+}
+
+exports.createMachineService = async (req,res)=>{
+  const employee = await db.Employee.findOne({where:{userId:req.user.id},include:db.User})
+  if(!employee) return res.status(400).send({ok:false})
+  const { error } = EventValidation(data);
+  if (error) return res.status(400).send(error.details[0].message);
+
+    try{
+      await db.MachineService.create({
+        start_date:req.body.start_date,
+        end_date:req.body.end_date,
+        employeeId:employee.id,
+        machineId:req.params.id});
+
+        res.send({ok:true})
+    }catch(err){
+        res.send(err);
+        logger.error({message: err, method: 'createMachineService'})
+    }
+}
+
+exports.getMachineServices = async (req,res)=>{
+  try{
+    const machineServices =  await db.MachineService.findAll({where:{machnieId:req.params.id}})
+    res.send(machineServices)
+  }catch(err){
+    res.send(err);
+    logger.error({message: err, method: 'getMachineServices'})
+  }
 }
