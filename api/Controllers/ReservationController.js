@@ -1,13 +1,28 @@
 const db = require('../../database/models/index')
 const {sendSupervisorEmails,sendToDepartmentHeadMessage} = require('../EmailService/messages')
 const {sendMessage} = require('../EmailService/config')
-const { ReservationValidation } = require('../Validation/resource')
+const { EventValidation } = require('../Validation/resource')
+const {ReservationState,ReservationSugestedState} = require('../Utils/constants')
 const uniqBy = require('lodash/uniqBy')
-const {EventValidation} = require('../Utils/translations')
 const logger = require('../Config/loggerConfig')
 const Op = db.Sequelize.Op;
+async function getSupervisedReservations(userId){
+  const workshopSupervised = await db.Reservation.findAll({attributes:['id','state','start_date','end_date',],include:
+    {model:db.Machine,attributes:['id','name','english_name'],required:true,include:
+    {model:db.Workshop,attributes:['id','name','english_name'],required:true,include:{model:db.Employee,where:{userId:userId}}}}});
+  
+  return workshopSupervised
+}
+async function getOwnedReservations(userId){
+  const owned = await db.Reservation.findAll({include:[
+    {model:db.Employee,where:{userId:userId}},
+    {model:db.Machine,required: true,include:db.Workshop},{model:db.ReservationSurvey}]}) 
+  return owned
+}
+
 
 exports.createReservation = async (req, res) => {
+  console.log(req.body)
   let data = req.body;
   let employee = await db.Employee.findOne({where:{userId:req.user.id},include:db.User})
 
@@ -20,15 +35,16 @@ exports.createReservation = async (req, res) => {
   if (error) return res.status(400).send(error.details[0].message);
 
   try {
-    
     const reservation = await db.Reservation.create({
-      state:ReservationTypes.PENDING,
+      state:ReservationState.PENDING,
+      suggestedState:ReservationSugestedState.ACCEPTED,
       start_date:data.start_date,
       end_date:data.end_date,
       employeeId:data.employeeId,
-      machineId:data.machineId});
-
-    if(req.body.comment){
+      machineId:data.machineId,
+      reservationPurpose:data.reservationPurpose});
+      
+    if(req.body.comment!==null){
       await db.ReservationRequestComment.create({
         reservationId:reservation.id,
         comment:req.body.comment
@@ -46,7 +62,6 @@ exports.createReservation = async (req, res) => {
       początek: ${new Date(data.start_date).toLocaleString('pl-PL')}
       koniec: ${new Date(data.end_date).toLocaleString('pl-PL')} `)
 
-      sendToDepartmentHeadMessage(reservation)
     })
     res.send({ok:true});
   } catch (err) {
@@ -62,23 +77,25 @@ exports.updateReservation = async(req,res)=>{
   if(!employee) return res.status(400).send({ok:false})
   data.employeeId = employee.id;
 
-  const { error } = ReservationValidation(data);
+  const { error } = EventValidation(data);
   if (error) return res.status(400).send(error.details[0].message);
 
+  
   try{
-    await db.Reservation.update({state:ReservationTypes.PENDING,
+    await db.Reservation.update({
+      state:ReservationState.PENDING,
+      suggestedState:ReservationSugestedState.ACCEPTED,
       start_date:data.start_date,
       end_date:data.end_date,
       employeeId:data.employeeId,
-      machineId:data.machineId
+      machineId:data.machineId,
+      reservationPurpose:data.reservationPurpose
     },{where:{id:id}})
-    await db.ReservationDeclineComment.destroy({where:{reservationId:id}})
 
     if(req.body.comment){
-      await db.ReservationRequestComment.create({
-        reservationId:id,
+      await db.ReservationRequestComment.update({
         comment:req.body.comment
-      })
+      },{where:{reservationId:id}})
     }
     
     res.on('finish',function(){
@@ -159,13 +176,9 @@ exports.getMachineReservation = async (req, res) => {
 };
 exports.getAllSupervisedReservation = async (req,res)=>{ 
   const userId = req.user.id;
-    const employee = await db.Employee.findOne({where:{userId:userId},include:{model:db.Lab}})
   try{
-    const workshopSupervised = await db.Reservation.findAll({attributes:['id','state','start_date','end_date',],include:
-    {model:db.Machine,attributes:['id','name','english_name'],required:true,include:
-    {model:db.Workshop,attributes:['id','name','english_name'],required:true,include:{model:db.Employee,where:{userId:userId}}}}});
-
-    res.send(workshopSupervised)
+    const result = await getSupervisedReservations(userId)
+    res.send(result)
   }catch(err){
     res.send(err)
     logger.error({message: err, method: 'getAllSupervisedReservation'})
@@ -173,9 +186,7 @@ exports.getAllSupervisedReservation = async (req,res)=>{
 }
 exports.getAllOwnedReservation = async (req,res)=>{
   try{
-    const reservations = await db.Reservation.findAll({include:[
-      {model:db.Employee,where:{userId:req.user.id}},
-      {model:db.Machine,required: true,include:db.Workshop,},{model:db.ReservationSurvey}]})    
+    const reservations = await  getOwnedReservations(req.user.id)    
     res.send(reservations)
   }catch(err)
   {
@@ -183,9 +194,23 @@ exports.getAllOwnedReservation = async (req,res)=>{
     logger.error({message: err, method: 'getAllOwnedReservation'})
   }
 }
+
+exports.getAllAssigned = async (req,res)=>{
+  let result = []
+  const owned = await  getOwnedReservations(req.user.id)
+  const supervised = await getSupervisedReservations(userId)
+  result.push(...owned)
+  result.push(...supervised)
+  res.send(result)
+}
+
 exports.getReservationById = async (req,res)=>{
-  const reservation = await db.Reservation.findOne({where:{id:req.params.id},
-    include:[{model:db.Employee,include:db.User},{model:db.Machine},{model:db.ReservationSurvey},{model:db.ReservationDeclineComment}]
+  const reservation = await db.Reservation.findOne({
+    where:{id:req.params.id},
+    include:[
+      {model:db.Employee,include:db.User},
+      {model:db.Machine},
+      ]
     })
   res.send(reservation)
 }
@@ -289,3 +314,4 @@ exports.getCancelReservationForm =async(req,res)=>{
   // if(!reservation || reservation.ReservationSurvey!==null) return res.status(400).send({ok:false})
   
 }
+

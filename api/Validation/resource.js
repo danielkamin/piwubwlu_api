@@ -18,7 +18,8 @@ exports.MachineValidation = (data) => {
     machineState: Joi.boolean().required(),
     workshopId: Joi.number().required(),
     additionalInfo:Joi.any(),
-    delayTime:Joi.number()
+    delayTime:Joi.number().min(12).required(),
+    resourceType:Joi.string().required()
   });
   return schema.validate(data);
 };
@@ -49,6 +50,8 @@ exports.EventValidation = (data) => {
     end_date: Joi.date().iso().min(Joi.ref('start_date')),
     employeeId: Joi.number().required(),
     machineId: Joi.number().required(),
+    comment:Joi.any(),
+    reservationPurpose:Joi.string()
   });
   return schema.validate(data);
 };

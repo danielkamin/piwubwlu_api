@@ -1,4 +1,5 @@
 const {roles} =require('./constants')
+const {UserRoles} = require('./constants')
 /**
  * Checks if user with given employeeId is supervising any laboratories or workshops.
  * If addSuperRole is true - give that role to the user, else remove that role
@@ -8,7 +9,7 @@ const {roles} =require('./constants')
  */
 const supervisorCheck = async (employeeId,db,addSuperRole)=>{
     const emp = await db.Employee.findByPk(employeeId)
-    const superRole = await db.Role.findOne({where:{role_name:roles[1]}})
+    const superRole = await db.Role.findOne({where:{role_name:UserRoles.SUPERVISOR}})
     const superUserRole = await db.UserRole.findOne({where:{roleId:superRole.id,userId:emp.userId}})
     if(addSuperRole){
         if(!superUserRole) await db.UserRole.create({roleId:superRole.id,userId:emp.userId})

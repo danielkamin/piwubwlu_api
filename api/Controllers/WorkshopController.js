@@ -9,6 +9,7 @@ Array.prototype.move = function (from,to) {
 }
 
 exports.createWorkshop = async (req, res) => {
+  console.log(req.body)
   const { error } = WorkshopValidation({
     name: req.body.name,
     english_name: req.body.english_name,
@@ -22,15 +23,7 @@ exports.createWorkshop = async (req, res) => {
   try {
     const workshop = await db.Workshop.create(req.body);
     let supervisorEmployees = req.body.employees;
-    res.on('finish',function () {
-      supervisorEmployees.forEach(async (emp)=>{
-        await db.WorkshopSupervisor.create({
-          EmployeeId: emp.employeeId,
-          WorkshopId: workshop.id
-        });
-        supervisorCheck(emp.employeeId,db,true)
-      })
-    })
+    
     res.send({ id: workshop.id });
   } catch (err) {
     res.send(err.sql);

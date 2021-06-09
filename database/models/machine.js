@@ -18,7 +18,10 @@ module.exports = (sequelize, DataTypes) => {
     machineState: DataTypes.BOOLEAN,
     imagePath:DataTypes.STRING,
     additionalInfo:DataTypes.JSON,
-    delayTime:DataTypes.INTEGER
+    delayTime:DataTypes.INTEGER,
+    isUE:DataTypes.BOOLEAN,
+    rentForCommercialUE:DataTypes.BOOLEAN,
+    resourceType:DataTypes.ENUM('MACHINE','SOFTWARE'),
   }, {
     sequelize,
     modelName: 'Machine',

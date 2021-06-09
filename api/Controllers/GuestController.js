@@ -3,6 +3,7 @@ const { validatePassword} = require('../Utils/helpers')
 const { sendMessage } = require('../EmailService/config')
 const {roles} = require('../Utils/constants')
 const { guestProfileValidation} = require('../Validation/auth')
+const {UserRoles} = require( '../Utils/constants')
 const logger = require('../Config/loggerConfig')
 exports.getGuestList = async(req,res)=>{
     try{
@@ -34,14 +35,20 @@ exports.updateGuest = async (req,res) => {
     if (error) return res.status(400).send(error.details[0].message);
 
     if(req.body.setEmployee == true) {
-      const emp = await db.Employee.create({userId:guest.userId,information:'',telephone:'',room:''})
-      await guest.destroy();
-      const role = await db.Role.findOne({where:{role_name:roles[2]}})
-      await db.UserRole.create({
-        userId: emp.userId,
-        roleId: role.id,
-      });
-      sendMessage(guest.User.email,'PIWUB - status konta','Twoje konto uzyskało daną rolę: PRACOWNIK')   
+      try{
+        const emp = await db.Employee.create({userId:guest.userId,information:'',telephone:'',room:''})
+        await guest.destroy();
+        const role = await db.Role.findOne({where:{role_name:UserRoles.EMPLOYEE}})
+        await db.UserRole.create({
+          userId: emp.userId,
+          roleId: role.id,
+        });
+        sendMessage(guest.User.email,'PIWUB - status konta','Twoje konto uzyskało daną rolę: PRACOWNIK')   
+      }catch(err){
+        res.send(err);
+        logger.error({message: err, method: 'updateGuest - setting employee'})
+      }
+      
     }else {
       await db.Guest.update(
         { isVerified: req.body.isVerified },

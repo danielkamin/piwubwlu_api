@@ -1,12 +1,16 @@
 const db = require( '../../database/models')
-const {roles} = require( '../Utils/constants')
+const {UserRoles} = require( '../Utils/constants')
 const { validatePassword } = require( '../Utils/helpers')
 const { guestProfileValidation} = require( '../Validation/auth')
 const { EmployeeProfileValidation} = require( '../Validation/resource')
 const logger = require('../Config/loggerConfig')
 
 exports.updateEmployee= async (req,res)=>{
-   let userBody = {firstName:req.body.firstName,lastName:req.body.lastName,email:req.body.email}
+   let userBody = {
+      firstName:req.body.firstName,
+      lastName:req.body.lastName,
+      email:req.body.email
+   }
    const {id} = req.params;
    const {error} = guestProfileValidation(userBody)
    if(error) return res.status(400).send(error.details[0].message)
@@ -25,7 +29,7 @@ exports.updateEmployee= async (req,res)=>{
 
       if(req.body.setEmployee===false){
          const guest = await db.Guest.create({userId:id,isVerified:true})
-         const role = await db.Role.findOne({where:{role_name:roles[2]}})
+         const role = await db.Role.findOne({where:{role_name:UserRoles.EMPLOYEE}})
          await db.UserRole.destroy({where:{
            userId: guest.userId,
            roleId: role.id,
@@ -63,7 +67,7 @@ exports.getEmployeeById = async (req,res)=>{
  try{
    // const employee = await db.Employee.findOne({where:{userId:req.params.id},
    //    include:[{model:db.User,required:true,attributes:['firstName','lastName','email']},{model:db.Department}]});
-   const employee = await db.User.findByPk(req.params.id,{attributes:['firstName','lastName','id','picturePath','email'],
+   const employee = await db.User.findByPk(req.params.id,{attributes:['firstName','lastName','id','imagePath','email'],
    include:[{model:db.Employee,required:true,
       include:[{model:db.Department},{model:db.Degree}]}]})
    res.send(employee)
@@ -112,5 +116,59 @@ exports.getAllEmployee = async (req,res)=>{
    {
       res.send(err)
       logger.error({message: err, method: 'getAllEmployee'})
+   }
+}
+
+exports.getAllSupervisedResources = async (req,res)=>{
+   try{
+      let combinedResources = []
+      if(req.user.role.indexOf(UserRoles.DEPARTMENTHEAD)!==-1){
+         const employeeWithResources = await db.Employee.findOne({where:{userId:req.user.id},
+            include:{model:db.DepartmentHead,include:{model:db.Department,
+            include:{model:db.Lab,
+               include:{model:db.Workshop,include:db.Machine}}}}})  
+
+         employeeWithResources.DepartmentHead.Department.Labs.forEach(labs=>{
+         
+            combinedResources.push({
+               id:'LAB'+labs.id,
+               name:labs.name,
+               english_name:labs.english_name,
+               description:'Laboratorium',
+               type:'LAB',
+               dbIndex:labs.id
+            })
+            labs.Workshops.forEach(workshops=>{
+               combinedResources.push({
+                  id:'WORKSHOP'+workshops.id,
+                  name:workshops.name,
+                  english_name:workshops.english_name,
+                  description:'PRacownia',
+                  type:'WORKSHOP',
+                  dbIndex:workshops.id
+               })
+
+               workshops.Machines.forEach(machine=>{
+                  combinedResources.push({
+                     id:'MACHINE'+machine.id,
+                     name:machine.name,
+                     english_name:machine.english_name,
+                     type:'MACHINE',
+                     description:'Aparatura/Oprogramowanie',
+                     dbIndex:machine.id
+                  })
+               })
+            })
+         })
+         res.send(combinedResources)
+      }
+      else {
+         res.send([])
+      }
+   
+   }catch(err)
+   {
+      res.send(err)
+      logger.error({message: err, method: 'getAllSupervisedResources'})
    }
 }

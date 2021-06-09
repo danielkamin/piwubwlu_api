@@ -6,13 +6,25 @@ const logger = require('../Config/loggerConfig')
 exports.createDepartment = async (req,res)=>{
     const { error } = DepartmentValidation(req.body);
     if (error) return res.status(400).send(error.details[0].message);
-    const empId = req.body.employeeId!==''?req.body.employeeId:null
     try{
-        await db.Department.create({
+        const department = await db.Department.create({
             name:req.body.name,
             english_name:req.body.english_name,
-            employeeId:empId,
         });
+        if(req.body.employeeId!==-1){
+            const depHead = await db.DepartmentHead.findOne({where:{
+                employeeId:+req.body.employeeId
+            }})
+            if(depHead===null){
+                await db.DepartmentHead.create({
+                    employeeId:+req.body.employeeId,
+                    departmentId:department.id
+                })
+            }
+            else{
+                return res.status(400).send({message:'Pracownik jest już przypisany do innej katedry!'})
+            }
+        }
         res.send({ ok: true });
     }catch(err)
     {
@@ -22,21 +34,57 @@ exports.createDepartment = async (req,res)=>{
 }
 exports.updateDepartment = async (req,res)=>{
     const { error } = DepartmentValidation(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
-  const empId = req.body.employeeId!==''?req.body.employeeId:null
+    if (error) return res.status(400).send(error.details[0].message);
+    const department = await db.Department.findByPk(req.params.id,{include:db.DepartmentHead})
     try{
-        await db.Department.update(
+        await department.update(
             {
                 name:req.body.name,
                 english_name:req.body.english_name,
-                employeeId:empId,
-            },
-            { where: { id: req.params.id } }
-          );
-          res.send({ ok: true });
+            });
+
+        
+        let otherEmployeeDepartments
+        const empId = +req.body.employeeId
+        otherEmployeeDepartments = await db.DepartmentHead.findOne({where:{
+            employeeId:empId
+        }})
+        if(empId !==-1){
+            //create or update
+            if(department.DepartmentHead!==null){
+                if(department.DepartmentHead.employeeId!==empId){                    
+                    if(otherEmployeeDepartments!==null){
+                        return res.status(400).send({message:'Pracownik jest już przypisany do innej katedry!'})
+                    }else{
+                        await db.DepartmentHead.update({
+                            employeeId:empId,
+                        },{where:{
+                            id:department.DepartmentHead.id
+                        }})
+                    }  
+                }
+            }else{
+                if(otherEmployeeDepartments!==null){
+                    return res.status(400).send({message:'Pracownik jest już przypisany do innej katedry!'})
+                }else{
+                    await db.DepartmentHead.create({
+                        employeeId:empId,
+                        departmentId:department.id
+                    })
+                }
+            }
+        }else{
+            //delete
+            if(department.DepartmentHead!==null){
+                await db.DepartmentHead.destroy({where:{
+                    departmentId:req.params.id
+                }})
+            }
+        }
+        res.send({ ok: true });
     }catch(err)
     {
-        res.send(err);
+        res.status(400).send(err);
         logger.error({message: err, method: 'updateDepartment'})
     }
 }
@@ -62,8 +110,15 @@ exports.getALLDepartment = async (req,res)=>{
 }
 exports.getDepartmentById = async (req,res)=>{
     try{
-        const department = await db.Department.findOne({include:db.Employee},{where:{id:req.params.id}});
-        res.send(department)
+        const department = await db.Department.findByPk(req.params.id,
+            {include:{model:db.DepartmentHead,include:db.Employee}});
+            console.log()
+        res.send({
+            id:department.id,
+            name:department.name,
+            english_name:department.english_name,
+            employeeId:department.DepartmentHead!==null? department.DepartmentHead.Employee.id : -1
+        })
     }catch(err)
     {
         res.send(err);

@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       Department.hasMany(models.Employee,{foreignKey:'departmentId'})
       Department.hasMany(models.Lab,{foreignKey:'departmentId'})
-      Department.hasOne(models.DepartmentHead,{foreignKey:'machineId'});
+      Department.hasOne(models.DepartmentHead,{foreignKey:'departmentId'});
     }
   };
   Department.init({

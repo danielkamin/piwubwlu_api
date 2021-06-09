@@ -1,6 +1,15 @@
 'use strict';
-const {UserRoles} = require('../../api/Utils/constants');
 const bcrypt = require('bcrypt')
+
+const UserRoles = [
+  {role_name:'ADMIN',description:'Administrator Platformy'}, 
+  {role_name:'FACULTYHEAD',description:'Dziekan'},
+  {role_name:'DEPUTYFACULTYHEAD',description:'Prodziekan'},
+  {role_name:'DEPARTMENTHEAD',description:'Kierownik Katedry'},
+  {role_name:'SUPERVISOR',description:'Nadzorca Pracowni'},
+  {role_name:'EMPLOYEE',description:'Pracownik'},
+  {role_name:'REGULAR',description:'Standardowy Użytkownik'},
+]; 
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -17,9 +26,10 @@ module.exports = {
     }],{ returning: ['id'] })
     let data = [];
 
-    Object.keys(UserRoles).forEach(role=>{
+    UserRoles.forEach(role=>{
       data.push({
-        role_name:role,
+        role_name:role.role_name,
+        description:role.description,
         createdAt: new Date(),
        updatedAt: new Date()
       })

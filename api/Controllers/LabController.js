@@ -10,6 +10,7 @@ exports.createLab = async (req, res) => {
       name: req.body.name,
       english_name: req.body.english_name,
       additionalInfo:req.body.additionalInfo,
+      departmentId:req.body.departmentId
     });
     res.send({ id: lab.id });
   } catch (err) {
@@ -22,7 +23,7 @@ exports.updateLab = async (req, res) => {
   const { error } = LabValidation({
     name: req.body.name,
     english_name: req.body.english_name,
-    additionalInfo:req.body.additionalInfo
+    additionalInfo:req.body.additionalInfo,
   });
   if (error) return res.status(400).send(error.details[0].message);
   const lab = await db.Lab.findByPk(req.params.id);
@@ -30,7 +31,8 @@ exports.updateLab = async (req, res) => {
     await lab.update({
       name: req.body.name,
       english_name: req.body.english_name,
-      additionalInfo:req.body.additionalInfo
+      additionalInfo:req.body.additionalInfo,
+      departmentId:req.body.departmentId
     });
     res.send({ id: req.params.id  });
   } catch (err) {
@@ -63,7 +65,7 @@ exports.getAllLab = async (req, res) => {
 
 exports.getLabById = async (req, res) => {
   try {
-    const lab = await db.Lab.findByPk(req.params.id,{include:[{model:db.Workshop},{model:db.Employee,include:db.User}]});
+    const lab = await db.Lab.findByPk(req.params.id,{include:[{model:db.Workshop}]});
     res.send(lab);
   } catch (err) {
     res.send(err.sql);
@@ -73,7 +75,7 @@ exports.getLabById = async (req, res) => {
 
 exports.getLabList = async (req, res) => {
   try {
-    const labList = await db.Lab.findAll({ attributes: ['id', 'name','employeeId','english_name','imagePath'] });
+    const labList = await db.Lab.findAll({ attributes: ['id', 'name','english_name','imagePath'] });
     res.send(labList);
   } catch (err) {
     res.send(err.sql);

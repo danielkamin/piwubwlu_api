@@ -18,3 +18,11 @@ exports = validatePassword = async (req,res)=>{
 exports.emptyStringToNull =(data)=>{
     return data !=='' ? data : null
 }
+
+function negativeIdToNull(data){
+    let result  = data===-1 ? null: data
+    return result
+}
+module.exports = {
+    negativeIdToNull
+}

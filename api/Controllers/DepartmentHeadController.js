@@ -68,19 +68,18 @@ exports.sendForCorrections = async (req,res)=>{
 
 exports.getAllAssignedReservations = async (req,res)=>{
     try{
-        const departmenHeadRecord = await db.DepartmentHead.findOne({include:{
-            model:db.Employee, where:{userId:req.user.id}
-        }})
-        const reservations  = await db.Reservation.findAll({attributes:['id','state','start_date','end_date',],include:
-        {model:db.Machine,attributes:['id','name','english_name'],required:true,include:
-        {model:db.Workshop,attributes:['id','name','english_name'],required:true,include:
-        {model:db.Labs,attributes:['id','name','english_name'],required:true,include:
-        {model:db.Department, where:{id:departmenHeadRecord.departmentId}}}}}},
-        {where:{
-            state:ReservationState.REVIEW   
-        }})
-
-        res.send(reservations)
+        const departmentHeadEmployee = await db.Employee.findOne({where:{userId:req.user.id},include:{model:db.DepartmentHead}})
+        if(departmentHeadEmployee.DepartmentHead!==null){
+            const reservations  = await db.Reservation.findAll({where:{
+                state:ReservationState.PENDING   
+            },attributes:['id','state','start_date','end_date',],include:
+            {model:db.Machine,attributes:['id','name','english_name'],required:true,include:
+            {model:db.Workshop,attributes:['id','name','english_name'],required:true,include:
+            {model:db.Lab,attributes:['id','name','english_name'],required:true,include:
+            {model:db.Department, where:{id:departmentHeadEmployee.DepartmentHead.departmentId}}}}}})
+            return res.send(reservations)
+        }
+        res.send([])
     }catch(err){
         res.send(err);
         logger.error({message: err, method: 'suggestDeclineReservation'})

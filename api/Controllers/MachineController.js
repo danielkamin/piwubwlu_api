@@ -1,10 +1,40 @@
 const db = require('../../database/models')
-const _ = require("lodash");
 const {sendMessage} = require('../EmailService/config')
 const {sendMachineSuspendedEmails} = require('../EmailService/messages')
-const { MachineValidation , EventValidation} = require('../Validation/resource')
+const { MachineValidation } = require('../Validation/resource')
+const {negativeIdToNull} = require('../Utils/helpers')
 const Op = db.Sequelize.Op;
 const logger = require('../Config/loggerConfig')
+
+const searchAndSort =async (type,req)=>{
+  let results = []
+  const attributesArray = ['id', 'name','english_name','imagePath','resourceType']
+  const name = (req.query.q===undefined)?'':(req.query.q)
+  switch(req.query.sort){
+      case 'asc':
+          results= await db.Machine.findAll({
+          attributes:attributesArray ,
+          order:[['name','ASC']],
+          where:{name:{[Op.iLike]:'%'+name+'%'},resourceType:type}
+      });
+      break;
+      case 'desc':
+          results= await db.Machine.findAll({
+          attributes: attributesArray,
+          order:[['name','DESC']],
+          where:{name:{[Op.iLike]:'%'+name+'%'},resourceType:type}
+      });
+      break;
+      default:
+          results= await db.Machine.findAll({
+          attributes: attributesArray,
+          where:{name:{[Op.iLike]:'%'+name+'%'},resourceType:type}
+      });
+      break;
+  }
+  console.log(results)
+  return results;
+}
 
 exports.createMachine = async (req, res) => {
   const values = {
@@ -15,9 +45,10 @@ exports.createMachine = async (req, res) => {
     machineState: req.body.machineState,
     additionalInfo:req.body.additionalInfo,
     workshopId: req.body.workshopId,
-    delayTime:req.body.delayTime
+    delayTime:req.body.delayTime,
+    resourceType:req.body.resourceType
   }
-
+  
   const { error } = MachineValidation(values);
   if (error) return res.status(400).send(error.details[0].message);
 
@@ -26,7 +57,7 @@ exports.createMachine = async (req, res) => {
     res.send({ id: machine.id });
   } catch (err) {
     res.send(err);
-    logger.error({message: err, method: 'getGuestList'})
+    logger.error({message: err, method: 'createMachine'})
   }
 };
 exports.removeMachine = async (req, res) => {
@@ -50,8 +81,9 @@ exports.updateMachine = async (req, res) => {
     maxUnit: req.body.maxUnit,
     machineState: req.body.machineState,
     additionalInfo:req.body.additionalInfo,
-    workshopId: req.body.workshopId,
-    delayTime:req.body.delayTime
+    workshopId: negativeIdToNull(req.body.workshopId),
+    delayTime:req.body.delayTime,
+    resourceType:req.body.resourceType
   }
   const { error } = MachineValidation(values);
   if (error) return res.status(400).send(error.details[0].message);
@@ -78,7 +110,7 @@ exports.getAllMachine = async (req, res) => {
     res.send(machines);
   } catch (err) {
     res.send(err);
-    logger.error({message: err, method: 'getGuestList'})
+    logger.error({message: err, method: 'getAllMachine'})
   }
 };
 exports.getMachineById = async (req, res) => {
@@ -89,46 +121,21 @@ exports.getMachineById = async (req, res) => {
 exports.getMachineSupervisors = async (req,res)=>{
   const supervisors = await db.Machine.findByPk(req.params.id,
     {include:{model:db.Workshop,
-      include:[{model:db.Employee,include:{model:db.User,attributes:['firstName','lastName','id']}},
-      {model:db.Lab,include:{model:db.Employee,include:{model:db.User,attributes:['firstName','lastName','id']}}}]}});
-  const tempUsers = [];
-  supervisors.Workshop.Lab.Employee && tempUsers.push(supervisors.Workshop.Lab.Employee.User)
+      include:{model:db.Employee,
+        include:{model:db.User,attributes:['firstName','lastName','id']}}}});
+  let users = [];
+  console.log(supervisors.Workshop)
   supervisors.Workshop.Employees && supervisors.Workshop.Employees.forEach((emp)=>{
-    tempUsers.push(emp.User)
+    users.push(emp.User)
   })
-  let users = _.uniqBy(tempUsers,'id')
   res.send(users)
 }
-exports.getMachineList = async (req,res)=>{
-  res.send(res.filteredResults);
+exports.getMachineList = async (req,res)=>{ 
+  const results  = await searchAndSort('MACHINE',req)
+  res.send(results);
 }
 
-exports.createMachineService = async (req,res)=>{
-  const employee = await db.Employee.findOne({where:{userId:req.user.id},include:db.User})
-  if(!employee) return res.status(400).send({ok:false})
-  const { error } = EventValidation(data);
-  if (error) return res.status(400).send(error.details[0].message);
-
-    try{
-      await db.MachineService.create({
-        start_date:req.body.start_date,
-        end_date:req.body.end_date,
-        employeeId:employee.id,
-        machineId:req.params.id});
-
-        res.send({ok:true})
-    }catch(err){
-        res.send(err);
-        logger.error({message: err, method: 'createMachineService'})
-    }
-}
-
-exports.getMachineServices = async (req,res)=>{
-  try{
-    const machineServices =  await db.MachineService.findAll({where:{machnieId:req.params.id}})
-    res.send(machineServices)
-  }catch(err){
-    res.send(err);
-    logger.error({message: err, method: 'getMachineServices'})
-  }
+exports.getSoftwareList = async (req,res)=>{
+  const results  = await searchAndSort('SOFTWARE',req)
+  res.send(results);
 }

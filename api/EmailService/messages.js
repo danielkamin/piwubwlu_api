@@ -3,24 +3,19 @@ const {sendMessage} = require('./config')
 
 
 exports.sendSupervisorEmails = async (machineId,db,title,message)=>{
-    let supervisors = await db.Machine.findByPk(machineId,{include:{model:db.Workshop,include:[{model:db.Employee,include:db.User},{model:db.Lab,include:{model:db.Employee,include:db.User}}]}})
+    let supervisors = await db.Machine.findByPk(machineId,{include:
+      {model:db.Workshop,include:
+        {model:db.Employee,required:true,include:db.User}}})
     const workshopSupervisorsOrder = await db.WorkshopSupervisor.findAll({where:{WorkshopId:supervisors.Workshop.id}})
-    /* All workshop supervisors */
-    // const workshopSuperEmails = supervisors.Workshop.Employees.map(emp=>{
-    //   return emp.User.email
-    // });
-    // workshopSuperEmails !==null && workshopSuperEmails.forEach(item=>{
-    //   sendMessage(item,'Nowa rezerwacja',`Została złożona nowa prośba na maszynę: ${supervisors.name}`)
-    // })
-  
+
     /* First on the list */ 
     let firstSupervisorIndex = supervisors.Workshop.Employees.map((item)=>{
       return item.id
     }).indexOf(workshopSupervisorsOrder[0].EmployeeId)
+
     try{
       const workshopSupervisorEmail = supervisors.Workshop.Employees[firstSupervisorIndex].User.email
       workshopSupervisorEmail !==null && sendMessage(workshopSupervisorEmail,title,message)
-      supervisors.Workshop.Lab.Employee.User.email !==null && sendMessage(supervisors.Workshop.Lab.Employee.User.email,title,message)
     }catch(err){
       console.log(err)
     }
