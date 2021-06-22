@@ -13,6 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       User.belongsToMany(models.Role,{through:'UserRoles'})
       User.hasOne(models.Guest,{foreignKey:'userId',onDelete:'CASCADE'})
       User.hasOne(models.Employee,{foreignKey:'userId',onDelete:'CASCADE'})
+      User.hasMany(models.ReservationComment,{foreignKey:'userId'})
     }
   };
   User.init({

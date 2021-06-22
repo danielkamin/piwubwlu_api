@@ -23,7 +23,15 @@ exports.createWorkshop = async (req, res) => {
   try {
     const workshop = await db.Workshop.create(req.body);
     let supervisorEmployees = req.body.employees;
-    
+    res.on('finish',function () {
+      supervisorEmployees.forEach(async (emp)=>{
+        await db.WorkshopSupervisor.create({
+          EmployeeId: emp.employeeId,
+          WorkshopId: workshop.id
+        });
+        supervisorCheck(emp.employeeId,db,true)
+      })
+    })
     res.send({ id: workshop.id });
   } catch (err) {
     res.send(err.sql);
@@ -130,10 +138,13 @@ exports.getHelperNamesWorkshops = async(req,res)=>{
     logger.error({message: err, method: 'getHelperNamesWorkshops'})
   }
 }
-exports.getWorkshopReservations = async (req,res)=>{
+exports.getWorkshopEvents = async (req,res)=>{
   const id = req.params.id;
   try{
-    const resourcesWithEvents = await db.Machine.findAll({where:{workshopId:id},include:{model:db.Reservation,include:{model:db.Employee,include:db.User}}})
+    const resourcesWithEvents = await db.Machine.findAll({where:{workshopId:id},
+      include:[{model:db.Reservation,
+        include:{model:db.Employee,include:db.User}},
+        {model:db.MachineService}],})
     res.send(resourcesWithEvents)
   }catch(err){
     res.send(err)

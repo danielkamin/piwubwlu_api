@@ -1,7 +1,7 @@
 const db = require('../../database/models')
 const logger = require('../Config/loggerConfig')
 const supervisorCheck = require('../Utils/supervisorCheck')
-const {ReservationState,ReservationSugestedState} = require('../Utils/constants')
+const {ReservationState} = require('../Utils/constants')
 const {sendMessage} = require('../EmailService/config')
 
 exports.setWorkshopSupervisors = async (req,res)=>{
@@ -52,7 +52,7 @@ exports.sendForCorrections = async (req,res)=>{
     try{
         const reservation = await db.Reservation.findByPk(req.params.id,{include:db.Machine})
         reservation.update({
-        sugestedState:ReservationSugestedState.CORRECT
+        state:ReservationState.PENDING
         })
         const employee = await db.Employee.findbyPk(reservation.employeeId,
             {include:db.User})
@@ -71,7 +71,7 @@ exports.getAllAssignedReservations = async (req,res)=>{
         const departmentHeadEmployee = await db.Employee.findOne({where:{userId:req.user.id},include:{model:db.DepartmentHead}})
         if(departmentHeadEmployee.DepartmentHead!==null){
             const reservations  = await db.Reservation.findAll({where:{
-                state:ReservationState.PENDING   
+                state:ReservationState.EVALUATION   
             },attributes:['id','state','start_date','end_date',],include:
             {model:db.Machine,attributes:['id','name','english_name'],required:true,include:
             {model:db.Workshop,attributes:['id','name','english_name'],required:true,include:

@@ -2,10 +2,11 @@ const db = require('../../database/models/index')
 const {sendSupervisorEmails,sendToDepartmentHeadMessage} = require('../EmailService/messages')
 const {sendMessage} = require('../EmailService/config')
 const { EventValidation } = require('../Validation/resource')
-const {ReservationState,ReservationSugestedState} = require('../Utils/constants')
+const {ReservationState, UserRoles,ReservationSugestedState} = require('../Utils/constants')
 const uniqBy = require('lodash/uniqBy')
 const logger = require('../Config/loggerConfig')
 const Op = db.Sequelize.Op;
+const lodash = require('lodash')
 async function getSupervisedReservations(userId){
   const workshopSupervised = await db.Reservation.findAll({attributes:['id','state','start_date','end_date',],include:
     {model:db.Machine,attributes:['id','name','english_name'],required:true,include:
@@ -19,7 +20,6 @@ async function getOwnedReservations(userId){
     {model:db.Machine,required: true,include:db.Workshop},{model:db.ReservationSurvey}]}) 
   return owned
 }
-
 
 exports.createReservation = async (req, res) => {
   console.log(req.body)
@@ -36,8 +36,7 @@ exports.createReservation = async (req, res) => {
 
   try {
     const reservation = await db.Reservation.create({
-      state:ReservationState.PENDING,
-      suggestedState:ReservationSugestedState.ACCEPTED,
+      state:ReservationState.VERIFICATION,
       start_date:data.start_date,
       end_date:data.end_date,
       employeeId:data.employeeId,
@@ -45,9 +44,10 @@ exports.createReservation = async (req, res) => {
       reservationPurpose:data.reservationPurpose});
       
     if(req.body.comment!==null){
-      await db.ReservationRequestComment.create({
+      await db.ReservationComment.create({
         reservationId:reservation.id,
-        comment:req.body.comment
+        comment:req.body.comment,
+        userId:req.user.id
       })
     }
   
@@ -83,8 +83,7 @@ exports.updateReservation = async(req,res)=>{
   
   try{
     await db.Reservation.update({
-      state:ReservationState.PENDING,
-      suggestedState:ReservationSugestedState.ACCEPTED,
+      state:ReservationState.VERIFICATION,
       start_date:data.start_date,
       end_date:data.end_date,
       employeeId:data.employeeId,
@@ -135,17 +134,6 @@ exports.cancelReservation = async(req,res)=>{
     logger.error({message: err, method: 'cancelReservation'})
   }
 }
-//remove
-const removeReservation = async (req) => {
-  try {
-    await db.Reservation.destroy({
-      where: { id: req.params.id },
-    });
-  } catch (err) {
-    res.send(err.sql);
-  }
-};
-//getall
 exports.getAllReservation = async (req, res) => {
   try {
     const reservations = await db.Reservation.findAll({include:
@@ -156,15 +144,6 @@ exports.getAllReservation = async (req, res) => {
     logger.error({message: err, method: 'getAllReservation'})
   }
 };
-//get by time interval
-exports.getTimeReservation = async (req, res) => {
-  try {
-
-  } catch (err) {
-    res.send(err.sql);
-  }
-};
-//get by machine
 exports.getMachineReservation = async (req, res) => {
   try {
     const reservations = await db.Reservation.findAll({where:{machineId:req.params.id},include:{model:db.Employee,include:db.User}})
@@ -177,8 +156,13 @@ exports.getMachineReservation = async (req, res) => {
 exports.getAllSupervisedReservation = async (req,res)=>{ 
   const userId = req.user.id;
   try{
-    const result = await getSupervisedReservations(userId)
-    res.send(result)
+    if(req.user.role.indexOf(UserRoles.SUPERVISOR)!==-1){
+      const supervised = await getSupervisedReservations(req.user.id)
+      return res.send(supervised)
+    }
+    else{
+      return res.send([])
+    }
   }catch(err){
     res.send(err)
     logger.error({message: err, method: 'getAllSupervisedReservation'})
@@ -194,16 +178,6 @@ exports.getAllOwnedReservation = async (req,res)=>{
     logger.error({message: err, method: 'getAllOwnedReservation'})
   }
 }
-
-exports.getAllAssigned = async (req,res)=>{
-  let result = []
-  const owned = await  getOwnedReservations(req.user.id)
-  const supervised = await getSupervisedReservations(userId)
-  result.push(...owned)
-  result.push(...supervised)
-  res.send(result)
-}
-
 exports.getReservationById = async (req,res)=>{
   const reservation = await db.Reservation.findOne({
     where:{id:req.params.id},
@@ -291,14 +265,12 @@ exports.getSurveyForm=async(req,res)=>{
   if(!reservation || reservation.ReservationSurvey!==null) return res.status(400).send({ok:false})
   res.send({ok:true})
 }
-
 exports.isOwner = async (req,res)=>{
   const emp = await db.Employee.findOne({where:{userId:req.user.id}})
   const reservation =await db.Reservation.findOne({where:{employeeId:emp.id,id:req.params.id},include:db.ReservationSurvey})
   if(!reservation) return res.status(400).send({ok:false});
   res.send({ok:true});
 }
-
 exports.getCancelReservationForm =async(req,res)=>{
   const emp = await db.Employee.findOne({where:{userId:req.user.id}})
   const declineForm =await db.ReservationDeclineComment.findOne({where:{reservationId:req.params.id}})
@@ -314,4 +286,87 @@ exports.getCancelReservationForm =async(req,res)=>{
   // if(!reservation || reservation.ReservationSurvey!==null) return res.status(400).send({ok:false})
   
 }
+exports.reservationStatus = async (req,res)=>{
+  try{
+    const reservation = await db.Reservation.findByPk(req.params.id,{
+      include:[{model:db.ReservationComment,include:db.User},
+        {model:db.ReservationSurvey}]
+    })
+    res.send(reservation)
+  }catch(err){
+    res.send(err)
+    logger.error({message: err, method: 'reservationStatus'})
+  }
+}
+exports.selectedReservationRole = async (req,res)=>{
+  try{
+    let statusCodes = []
+    const currentUserId = req.user.id
+    const reservation = await db.Reservation.findByPk(req.params.id,{include:[
+      {model:db.Machine,include:{model:db.Workshop,include:[{model:db.Employee},{model:db.Lab,include:{model:db.Department,include:{model:db.DepartmentHead,include:db.Employee}}}]}},
+      {model:db.Employee,include:db.User}]})
+    if(reservation.Employee.userId === currentUserId){
+      statusCodes.push(0)
+    }  
+    else if(lodash.findIndex(reservation.Machine.Workshop.Employees,(emp)=>{return emp.userId === currentUserId})){
+      statusCodes.push(1)
+    }
+    else if(reservation.Machine.Workshop.Lab.Department.DepartmentHead.Employee.userId===currentUserId){
+      statusCodes.push(2)
+    }
+    if(statusCodes.length<1){
+      return res.send(null)
+    }else{
+      return res.send(statusCodes)
+    }
+  }catch(err){
+    res.send(err)
+    logger.error({message: err, method: 'reservationStatus'})
+  }
+}
 
+exports.addReservationComment = async (req,res)=>{
+  try{
+    await db.ReservationComment.create({
+      reservationId:req.params.id,
+      userId:req.user.id,
+      comment:req.body.comment
+    })
+    res.send({ok:true})
+  }catch(err){
+    res.send(err)
+    logger.error({message: err, method: 'addReservationComment'})
+  }
+}
+
+exports.saveReservationComment = async (req,res)=>{
+  try{
+    await db.ReservationComment.create({
+      reservationId:req.params.id,
+      userId:req.user.id,
+      comment:req.body.comment
+    })  
+    res.send({ok:true})
+  }catch(err){
+    res.send(err)
+    logger.error({message: err, method: 'saveReservationData'})
+  }
+}
+
+exports.changeSugestedState = async (req,res)=>{
+  try{
+    await db.Reservation.update({state:ReservationState.PENDING})
+  }catch(er){
+    res.send(err)
+    logger.error({message: err, method: 'saveReservationData'})
+  }
+}
+
+exports.passToBooker = async (req,res)=>{
+  try{
+    await db.Reservation.update({state:req.body.state})
+  }catch(er){
+    res.send(err)
+    logger.error({message: err, method: 'saveReservationData'})
+  }
+}

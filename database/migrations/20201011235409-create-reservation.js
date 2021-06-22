@@ -18,7 +18,7 @@ module.exports = {
         type: Sequelize.DATE
       },
       sugestedState: {
-        type: Sequelize.ENUM('ACCEPTED','DECLINED','CORRECT')
+        type: Sequelize.ENUM('ACCEPTED','DECLINED','CORRECT','INITIAL')
       },
       employeeId:{
         type: Sequelize.INTEGER,

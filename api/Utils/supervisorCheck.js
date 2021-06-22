@@ -17,8 +17,7 @@ const supervisorCheck = async (employeeId,db,addSuperRole)=>{
         const workshops = await db.WorkshopSupervisor.findAll({where:{EmployeeId:employeeId}})
         if(workshops.length===0){
             await db.UserRole.destroy({where:{roleId:superRole.id,userId:emp.userId}})
-        }
-            
+        } 
     }    
 
 }

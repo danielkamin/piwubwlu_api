@@ -14,17 +14,19 @@ exports.guestTypes = {
     employee:"EMPLOYEE",
 }
 exports.ReservationState = {
-  FINISHED:'FINISHED',
-  PENDING:'PENDING',
-  ACCEPTED:'ACCEPTED',
-  DECLINED:'DECLINED',
-  REVIEW:'REVIEW'
+  ENDED:'ZAKOŃCZONA',
+  PENDING:'OCZEKUJĄCA',
+  ACCEPTED:'ZAAKCEPTOWANA',
+  DECLINED:'ODRZUCONA',
+  VERIFICATION:'WERYFIKACJA',
+  EVALUATION:'EWALUACJA',
+  APPROVAL:'ZATWIERDZENIE'
 }
 
 exports.ReservationSugestedState = {
-  CORRECT:'CORRECT',
-  ACCEPTED:'ACCEPTED',
-  DECLINED:'DECLINED'
+  ACCEPTED:'Do akceptacji',
+  DECLINED:'Do odrzucenia',
+  CORRECT:'Do poprawek'
 }
 
 exports.WEB_URL = 'https://localhost:3000';

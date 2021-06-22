@@ -8,13 +8,13 @@ module.exports = (sequelize, DataTypes) => {
       Reservation.belongsTo(models.Machine,{foreignKey:'machineId'})
       Reservation.belongsTo(models.Employee,{foreignKey:'employeeId'})
       Reservation.hasOne(models.ReservationSurvey,{foreignKey:'reservationId',onDelete:'CASCADE'})
-      Reservation.hasOne(models.ReservationDeclineComment,{foreignKey:'reservationId',onDelete:'CASCADE'})
+      Reservation.hasMany(models.ReservationComment,{foreignKey:'reservationId',onDelete:'CASCADE'})
       Reservation.hasOne(models.EmailLogs,{foreignKey:'reservationId'})
     }
   };
   Reservation.init({
-    state: DataTypes.ENUM('FINISHED','PENDING','ACCEPTED','DECLINED','REVIEW'),
-    sugestedState:DataTypes.ENUM('CORRECT','ACCEPTED','DECLINED'),
+    state: DataTypes.STRING,
+    sugestedState:DataTypes.STRING,
     reservationPurpose:DataTypes.ENUM('SCIENTIFIC','DIDACTIC','COMMERCIAL'),
     start_date: DataTypes.DATE,
     end_date: DataTypes.DATE

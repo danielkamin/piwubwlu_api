@@ -8,13 +8,13 @@ const {UserRoles} = require('../Utils/constants')
 const {authorizeRole} = require('../Middlewares/rolesAuthorize')
 const upload = require('../Utils/multerConfig')
 const {createWorkshop,updateWorkshop,removeWorkshop, getAllWorkshop, 
-    getHelperNamesWorkshops,getWorkshopById, getWorkshopsList,getWorkshopReservations} = require('../Controllers/WorkshopController')
+    getHelperNamesWorkshops,getWorkshopById, getWorkshopsList,getWorkshopEvents} = require('../Controllers/WorkshopController')
 const {uploadImage,deleteImage} = require('../Middlewares/imageHandler')
 
 
 const workshopRouter = express.Router();
 workshopRouter.get('/names', getHelperNamesWorkshops);
-workshopRouter.get('/reservations/:id', getWorkshopReservations);
+workshopRouter.get('/events/:id', getWorkshopEvents);
 workshopRouter.get('/list', seachAndSortData(db.Workshop,Op),getWorkshopsList);
 workshopRouter.get('/:id',  getWorkshopById);
 workshopRouter.get('/', verifyAccessToken,  getAllWorkshop);

@@ -32,7 +32,6 @@ const searchAndSort =async (type,req)=>{
       });
       break;
   }
-  console.log(results)
   return results;
 }
 
@@ -124,7 +123,6 @@ exports.getMachineSupervisors = async (req,res)=>{
       include:{model:db.Employee,
         include:{model:db.User,attributes:['firstName','lastName','id']}}}});
   let users = [];
-  console.log(supervisors.Workshop)
   supervisors.Workshop.Employees && supervisors.Workshop.Employees.forEach((emp)=>{
     users.push(emp.User)
   })

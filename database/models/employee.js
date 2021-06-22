@@ -13,6 +13,7 @@ module.exports = (sequelize, DataTypes) => {
       Employee.hasOne(models.MachineService,{foreignKey:'employeeId'})
       Employee.hasOne(models.DepartmentHead,{foreignKey:'employeeId'});
       Employee.hasOne(models.FacultyAuthorities,{foreignKey:'employeeId'})
+      
     }
   };
   Employee.init({

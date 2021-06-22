@@ -42,8 +42,6 @@ exports.updateDepartment = async (req,res)=>{
                 name:req.body.name,
                 english_name:req.body.english_name,
             });
-
-        
         let otherEmployeeDepartments
         const empId = +req.body.employeeId
         otherEmployeeDepartments = await db.DepartmentHead.findOne({where:{

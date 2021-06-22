@@ -2,6 +2,7 @@
 const cron = require( 'node-cron')
 const {sendMessage} = require('./config')
 const {sendMonthlyStatistics} = require('./messages')
+const {ReservationState} = require('../Utils/constants')
 /**
  * Configuration function, that sets up e-mail sending cron jobs for the server
  * @param {Object} cron 
@@ -22,7 +23,7 @@ const cronUpcomingReservations = async (db,Op)=>{
       const today = new Date()
       let tomorrow =  new Date()
       tomorrow.setDate(today.getDate() + 1)
-      const upcomingReservations = await db.Reservation.findAll({where:{start_date:{[Op.lt]:tomorrow,[Op.gte]:today},state:ReservationTypes.ACCEPTED},include:[{model:db.Employee,include:db.User},{model:db.Machine}]})
+      const upcomingReservations = await db.Reservation.findAll({where:{start_date:{[Op.lt]:tomorrow,[Op.gte]:today},state:ReservationState.ACCEPTED},include:[{model:db.Employee,include:db.User},{model:db.Machine}]})
       upcomingReservations.forEach(item=>{
         const machine = item.Machine.name;
         const email = item.Employee.User.email;
@@ -53,7 +54,7 @@ const cronReservationStateChange = async(db,Op)=>{
       yesterday.setDate(today.getDate() -1)
       const latestReservations = await db.Reservation.findAll({where:{end_date:{[Op.lt]:today,[Op.gte]:yesterday}}})
       latestReservations.forEach((item)=>{
-        item.update({state:ReservationTypes.FINISHED})
+        item.update({state:ReservationState.ENDED})
       })
     },{scheduled:true,timezone:"Europe/Warsaw"})
 }
@@ -65,7 +66,7 @@ exports.newCronAction = (db,Op,eventEndDate,eventId) => {
     month = eventEndDate.getMonth().toString(), 
     year = eventEndDate.getFullYear().toString();
     cron.schedule(`${minute} ${hour} ${day} ${month} *`,()=>{
-      db.Reservation.update({state:ReservationTypes.FINISHED, where:{id:eventId}})
+      db.Reservation.update({state:ReservationState.ENDED, where:{id:eventId}})
       
     })
 }

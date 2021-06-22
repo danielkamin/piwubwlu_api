@@ -37,6 +37,7 @@ exports.updateEmployee= async (req,res)=>{
          await db.Employee.destroy({where:{userId:id}});
       }
       else {
+         console.log(req.body)
          await db.Employee.update({
             departmentId:req.body.departmentId===0?null:+(req.body.departmentId),
             degreeId:req.body.degreeId===0?null:req.body.degreeId,
@@ -98,7 +99,7 @@ exports.displayEmployees = async (req,res)=>{
    //    {model:db.User,required:true,attributes:['id','firstName','lastName','email','picturePath']},
    //    {model:db.Department,attributes:['id','name']}
    // ]}) 
-      const employees = await db.User.findAll({where:{userType:'GUEST'},attributes:['id','firstName','lastName','picturePath','userType'],include:[{model:db.Employee,required:true,include:[{model:db.Department},{model:db.Degree}]}]},)
+      const employees = await db.User.findAll({where:{userType:'GUEST'},attributes:['id','firstName','lastName','imagePath','userType'],include:[{model:db.Employee,required:true,include:[{model:db.Department},{model:db.Degree}]}]},)
    res.send(employees)
    }catch(err)
    {
@@ -143,7 +144,7 @@ exports.getAllSupervisedResources = async (req,res)=>{
                   id:'WORKSHOP'+workshops.id,
                   name:workshops.name,
                   english_name:workshops.english_name,
-                  description:'PRacownia',
+                  description:'Pracownia',
                   type:'WORKSHOP',
                   dbIndex:workshops.id
                })
@@ -153,7 +154,7 @@ exports.getAllSupervisedResources = async (req,res)=>{
                      id:'MACHINE'+machine.id,
                      name:machine.name,
                      english_name:machine.english_name,
-                     type:'MACHINE',
+                     type:machine.resourceType,
                      description:'Aparatura/Oprogramowanie',
                      dbIndex:machine.id
                   })
@@ -161,6 +162,19 @@ exports.getAllSupervisedResources = async (req,res)=>{
             })
          })
          res.send(combinedResources)
+      }else if(req.user.role.indexOf(UserRoles.SUPERVISOR)!==-1){
+         const workshops = await db.Workshop.findAll({include:{model:db.Employee,where:{userId:req.user.id}}})
+         workshops.forEach(workshop=>{
+            combinedResources.push({
+               id:'WORKSHOP'+workshop.id,
+               name:workshop.name,
+               english_name:workshop.english_name,
+               description:'Pracownia',
+               type:'WORKSHOP',
+               dbIndex:workshop.id
+            })
+         })
+         return res.send(combinedResources)
       }
       else {
          res.send([])
