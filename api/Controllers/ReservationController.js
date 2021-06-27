@@ -2,7 +2,7 @@ const db = require('../../database/models/index')
 const {sendSupervisorEmails,sendToDepartmentHeadMessage} = require('../EmailService/messages')
 const {sendMessage} = require('../EmailService/config')
 const { EventValidation } = require('../Validation/resource')
-const {ReservationState, UserRoles,ReservationSugestedState} = require('../Utils/constants')
+const {ReservationState, UserRoles,ReservationSugestedState,UserTypes} = require('../Utils/constants')
 const uniqBy = require('lodash/uniqBy')
 const logger = require('../Config/loggerConfig')
 const Op = db.Sequelize.Op;
@@ -22,7 +22,6 @@ async function getOwnedReservations(userId){
 }
 
 exports.createReservation = async (req, res) => {
-  console.log(req.body)
   let data = req.body;
   let employee = await db.Employee.findOne({where:{userId:req.user.id},include:db.User})
 
@@ -36,11 +35,12 @@ exports.createReservation = async (req, res) => {
 
   try {
     const reservation = await db.Reservation.create({
-      state:ReservationState.VERIFICATION,
+      state:ReservationState.EVALUATION,
       start_date:data.start_date,
       end_date:data.end_date,
       employeeId:data.employeeId,
       machineId:data.machineId,
+      sugestedState:ReservationSugestedState.ACCEPTED,
       reservationPurpose:data.reservationPurpose});
       
     if(req.body.comment!==null){
@@ -50,7 +50,14 @@ exports.createReservation = async (req, res) => {
         userId:req.user.id
       })
     }
-  
+    await db.ReservationRequiredUser.create({
+      reservationId:reservation.id
+    })
+    await db.ReservationHistoryChange.create({
+      userId:req.user.id,
+      reservationId:reservation.id,
+      description:`Utworzenie prośby o rezerwację przez: ${req.user.userName}`
+    })
     res.on('finish',function(){
       sendSupervisorEmails(data.machineId,db,'Nowa rezerwacja w systemie',
       `Została złożona nowa rezerwacja na maszynę: ${machine.name}.
@@ -83,11 +90,12 @@ exports.updateReservation = async(req,res)=>{
   
   try{
     await db.Reservation.update({
-      state:ReservationState.VERIFICATION,
+      state:ReservationState.EVALUATION,
       start_date:data.start_date,
       end_date:data.end_date,
       employeeId:data.employeeId,
       machineId:data.machineId,
+      sugestedState:ReservationSugestedState.ACCEPTED,
       reservationPurpose:data.reservationPurpose
     },{where:{id:id}})
 
@@ -96,6 +104,12 @@ exports.updateReservation = async(req,res)=>{
         comment:req.body.comment
       },{where:{reservationId:id}})
     }
+
+    await db.ReservationHistoryChange.create({
+      userId:req.user.id,
+      reservationId:id,
+      description:`Aktualizacja prośby o rezerwację przez: ${req.user.userName}`
+    })
     
     res.on('finish',function(){
       sendSupervisorEmails(data.machineId,db,'Rezerwacja - aktualizacja',
@@ -289,8 +303,13 @@ exports.getCancelReservationForm =async(req,res)=>{
 exports.reservationStatus = async (req,res)=>{
   try{
     const reservation = await db.Reservation.findByPk(req.params.id,{
-      include:[{model:db.ReservationComment,include:db.User},
-        {model:db.ReservationSurvey}]
+      include:[
+        {model:db.Machine},
+        {model:db.ReservationComment,include:db.User},
+        {model:db.ReservationSurvey},
+        {model:db.ReservationHistoryChange},
+        {model:db.ReservationRequiredUser,include:db.User}],
+        order:[['ReservationComments','createdAt','DESC'],['ReservationHistoryChanges','createdAt','DESC']]
     })
     res.send(reservation)
   }catch(err){
@@ -308,34 +327,22 @@ exports.selectedReservationRole = async (req,res)=>{
     if(reservation.Employee.userId === currentUserId){
       statusCodes.push(0)
     }  
-    else if(lodash.findIndex(reservation.Machine.Workshop.Employees,(emp)=>{return emp.userId === currentUserId})){
+    else if(lodash.findIndex(reservation.Machine.Workshop.Employees,(emp)=>{return emp.userId === currentUserId})!==-1){
       statusCodes.push(1)
     }
     else if(reservation.Machine.Workshop.Lab.Department.DepartmentHead.Employee.userId===currentUserId){
       statusCodes.push(2)
     }
+    console.log(statusCodes)
     if(statusCodes.length<1){
       return res.send(null)
     }else{
+      
       return res.send(statusCodes)
     }
   }catch(err){
     res.send(err)
     logger.error({message: err, method: 'reservationStatus'})
-  }
-}
-
-exports.addReservationComment = async (req,res)=>{
-  try{
-    await db.ReservationComment.create({
-      reservationId:req.params.id,
-      userId:req.user.id,
-      comment:req.body.comment
-    })
-    res.send({ok:true})
-  }catch(err){
-    res.send(err)
-    logger.error({message: err, method: 'addReservationComment'})
   }
 }
 
@@ -346,17 +353,13 @@ exports.saveReservationComment = async (req,res)=>{
       userId:req.user.id,
       comment:req.body.comment
     })  
+    await db.ReservationHistoryChange.create({
+      userId:req.user.id,
+      reservationId:req.params.id,
+      description:`Dodanie komentarza przez użytkownika ${req.user.userName}`
+    })
     res.send({ok:true})
   }catch(err){
-    res.send(err)
-    logger.error({message: err, method: 'saveReservationData'})
-  }
-}
-
-exports.changeSugestedState = async (req,res)=>{
-  try{
-    await db.Reservation.update({state:ReservationState.PENDING})
-  }catch(er){
     res.send(err)
     logger.error({message: err, method: 'saveReservationData'})
   }
@@ -368,5 +371,37 @@ exports.passToBooker = async (req,res)=>{
   }catch(er){
     res.send(err)
     logger.error({message: err, method: 'saveReservationData'})
+  }
+}
+
+exports.changeReservationSettings = async (req,res)=>{
+  const id = req.params.id
+  try{
+    if(req.body.userType===UserTypes.OTHER){
+      if(req.body.name!=='')
+      {
+        await db.ReservationRequiredUser.update(
+          {name:req.body.name,
+          userType:req.body.userType},
+          {where:{reservationId:id}})
+      }
+    }else{
+      if(req.body.userId!==-1){
+        await db.ReservationRequiredUser.update(
+          {userId:+req.body.userId,
+          userType:req.body.userType},
+          {where:{reservationId:id}})
+      }      
+    }
+    await db.Reservation.update({sugestedState:req.body.sugestedState},{where:{id:id}})
+    await db.ReservationHistoryChange.create({
+      userId:req.user.id,
+      reservationId:id,
+      description:`Zmiana wymaganej osoby/sugerowanego stanu rezerwacji ${req.user.userName}`
+    })
+    res.send({ok:true})
+  }catch(err){
+    res.send(err)
+    logger.error({message: err, method: 'changeReservationSettings'})
   }
 }

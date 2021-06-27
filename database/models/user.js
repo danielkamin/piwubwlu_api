@@ -14,6 +14,8 @@ module.exports = (sequelize, DataTypes) => {
       User.hasOne(models.Guest,{foreignKey:'userId',onDelete:'CASCADE'})
       User.hasOne(models.Employee,{foreignKey:'userId',onDelete:'CASCADE'})
       User.hasMany(models.ReservationComment,{foreignKey:'userId'})
+      User.hasMany(models.ReservationHistoryChange,{foreignKey:'userId'})
+      User.hasOne(models.ReservationRequiredUser,{foreignKey:'userId'})
     }
   };
   User.init({

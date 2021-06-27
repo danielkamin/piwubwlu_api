@@ -186,3 +186,15 @@ exports.getAllSupervisedResources = async (req,res)=>{
       logger.error({message: err, method: 'getAllSupervisedResources'})
    }
 }
+
+exports.getUsersByType = async (req,res)=>{
+   try{
+      const users = await db.User.findAll
+      ({ attributes: ['id', 'firstName','lastName','userType','email'],where:{userType:req.params.type.toUpperCase()}});
+      res.send(users)
+   }catch(err)
+   {
+      res.send(err)
+      logger.error({message: err, method: 'getUsersByType'})
+   }
+}
