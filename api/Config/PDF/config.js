@@ -8,6 +8,8 @@ const fonts = {
 	}
 };
 const PdfPrinter = require('pdfmake')
+
 const Printer = new PdfPrinter(fonts);
+
 
 export default Printer

@@ -171,7 +171,7 @@ exports.getAllSupervisedReservation = async (req,res)=>{
   const userId = req.user.id;
   try{
     if(req.user.role.indexOf(UserRoles.SUPERVISOR)!==-1){
-      const supervised = await getSupervisedReservations(req.user.id)
+      const supervised = await getSupervisedReservations(userId)
       return res.send(supervised)
     }
     else{
@@ -300,6 +300,10 @@ exports.getCancelReservationForm =async(req,res)=>{
   // if(!reservation || reservation.ReservationSurvey!==null) return res.status(400).send({ok:false})
   
 }
+
+
+
+/* START - RESERVATION FLOW METHODS */
 exports.reservationStatus = async (req,res)=>{
   try{
     const reservation = await db.Reservation.findByPk(req.params.id,{
@@ -345,7 +349,6 @@ exports.selectedReservationRole = async (req,res)=>{
     logger.error({message: err, method: 'reservationStatus'})
   }
 }
-
 exports.saveReservationComment = async (req,res)=>{
   try{
     await db.ReservationComment.create({
@@ -364,19 +367,62 @@ exports.saveReservationComment = async (req,res)=>{
     logger.error({message: err, method: 'saveReservationData'})
   }
 }
-
 exports.passToBooker = async (req,res)=>{
   try{
-    await db.Reservation.update({state:req.body.state})
+    const reservation = await db.Reservation.findByPk(req.params.id)
+    if(!reservation)
+      return res.status(400).send({ok:false,message:'reservation not found'})
+
+    switch(reservation.sugestedState)
+    {
+      case ReservationSugestedState.ACCEPTED:
+        await reservation.update({state:ReservationState.ACCEPTED})
+        break;
+      case ReservationSugestedState.DECLINED:
+        await reservation.update({state:ReservationState.DECLINED})
+        break;
+      case ReservationSugestedState.CORRECT:
+        await reservation.update({state:ReservationState.PENDING})
+        break;
+      default:
+        return res.status(400).send({ok:false,message:'nieznany error z metody passToBooker'})
+    }     
   }catch(er){
     res.send(err)
-    logger.error({message: err, method: 'saveReservationData'})
+    logger.error({message: err, method: 'passToBooker'})
   }
 }
-
+exports.passToWorkshopSupervisor = async (req,res)=>{
+  try{
+    const reservation = await db.Reservation.findByPk(req.params.id)
+    if(!reservation)
+      return res.status(400).send({ok:false,message:'reservation not found'})
+    if(reservation.state===ReservationState.PENDING){
+      await reservation.update({state:ReservationState.EVALUATION})
+    }else{
+      await reservation.update({state:ReservationState.APPROVAL})
+    }
+    
+  }catch(er){
+    res.send(err)
+    logger.error({message: err, method: 'passToWorkshopSupervisor'})
+  }
+}
+exports.passToDepartmentHead = async (req,res)=>{
+  try{
+    const reservation = await db.Reservation.findByPk(req.params.id)
+    if(!reservation)
+      return res.status(400).send({ok:false,message:'reservation not found'})
+    await reservation.update({state:ReservationState.VERIFICATION})
+  }catch(er){
+    res.send(err)
+    logger.error({message: err, method: 'passToDepartmentHead'})
+  }
+}
 exports.changeReservationSettings = async (req,res)=>{
   const id = req.params.id
   try{
+    //jeżeli zaakceptowana lub odrzucona to z powrotem status na ewaluacja
     if(req.body.userType===UserTypes.OTHER){
       if(req.body.name!=='')
       {
@@ -405,3 +451,4 @@ exports.changeReservationSettings = async (req,res)=>{
     logger.error({message: err, method: 'changeReservationSettings'})
   }
 }
+/* END - RESERVATION FLOW METHODS */

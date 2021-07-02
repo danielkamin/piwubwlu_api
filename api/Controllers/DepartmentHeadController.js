@@ -70,13 +70,11 @@ exports.getAllAssignedReservations = async (req,res)=>{
     try{
         const departmentHeadEmployee = await db.Employee.findOne({where:{userId:req.user.id},include:{model:db.DepartmentHead}})
         if(departmentHeadEmployee.DepartmentHead!==null){
-            const reservations  = await db.Reservation.findAll({where:{
-                state:ReservationState.EVALUATION   
-            },attributes:['id','state','start_date','end_date',],include:
+            const reservations  = await db.Reservation.findAll({attributes:['id','state','start_date','end_date',],include:
             {model:db.Machine,attributes:['id','name','english_name'],required:true,include:
             {model:db.Workshop,attributes:['id','name','english_name'],required:true,include:
             {model:db.Lab,attributes:['id','name','english_name'],required:true,include:
-            {model:db.Department, where:{id:departmentHeadEmployee.DepartmentHead.departmentId}}}}}})
+            {model:db.Department, required:true,where:{id:departmentHeadEmployee.DepartmentHead.departmentId}}}}}})
             return res.send(reservations)
         }
         res.send([])

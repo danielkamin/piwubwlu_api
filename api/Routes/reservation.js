@@ -2,7 +2,8 @@ const express = require('express')
 const {getAllOwnedReservation,getAllSupervisedReservation,updateReservationState,
     createReservation,getReservationById,saveReservationComment, getAllReservation,getCancelReservationForm,
     upcomingReservations,latestReservations,sendSurvey,getSurveyForm,isOwner,cancelReservation,
-    updateReservation,reservationStatus,selectedReservationRole,sendForCorrections,changeReservationSettings}
+    updateReservation,reservationStatus,selectedReservationRole,changeReservationSettings,
+    passToBooker,passToDepartmentHead,passToWorkshopSupervisor}
      = require('../Controllers/ReservationController')
 const { verifyAccessToken } = require('../Middlewares/tokenVerify')
 const rentalRouter = express.Router();
@@ -20,7 +21,10 @@ rentalRouter.get('/state/:id',verifyAccessToken,reservationStatus);
 rentalRouter.post('/state/:id/comment',verifyAccessToken,saveReservationComment);
 rentalRouter.get('/state/:id/role',verifyAccessToken,selectedReservationRole)
 rentalRouter.post('/state/:id/settings',verifyAccessToken,changeReservationSettings)
-rentalRouter.post('/')
+rentalRouter.post('/state/:id/department_head',verifyAccessToken,passToDepartmentHead)
+rentalRouter.post('/state/:id/workshop_supervisor',verifyAccessToken,passToWorkshopSupervisor)
+rentalRouter.post('/state/:id/booker',verifyAccessToken,passToBooker)
+
 
 rentalRouter.get('/:id',verifyAccessToken,getReservationById);
 rentalRouter.post('/',verifyAccessToken,createReservation);
