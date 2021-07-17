@@ -1,10 +1,10 @@
 const fonts = {
 	Roboto: {
-		normal: 'fonts/Roboto-Regular.ttf',
-		bold: 'fonts/Roboto-Medium.ttf',
-		italics: 'fonts/Roboto-Italic.ttf',
-		medium: 'fonts/Roboto-Medium.ttf',
-        light:'fonts/Roboto-Light.ttf'
+		normal: 'api/config/PDF/Fonts/Roboto-Regular.ttf',
+		bold: 'api/config/PDF/Fonts/Roboto-Medium.ttf',
+		italics: 'api/config/PDF/Fonts/Roboto-Italic.ttf',
+		medium: 'api/config/PDF/Fonts/Roboto-Medium.ttf',
+        light:'api/config/PDF/Fonts/Roboto-Light.ttf'
 	}
 };
 const PdfPrinter = require('pdfmake')
@@ -12,4 +12,4 @@ const PdfPrinter = require('pdfmake')
 const Printer = new PdfPrinter(fonts);
 
 
-export default Printer
+module.exports= Printer

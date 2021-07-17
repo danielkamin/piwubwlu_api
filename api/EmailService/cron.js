@@ -1,8 +1,12 @@
 
 const cron = require( 'node-cron')
+const logger = require('../Config/loggerConfig')
 const {sendMessage} = require('./config')
 const {sendMonthlyStatistics} = require('./messages')
 const {ReservationState} = require('../Utils/constants')
+const {departmentStatistics} 
+    = require('../Controllers/StatisticsController')
+const db = require('../../database/models')
 /**
  * Configuration function, that sets up e-mail sending cron jobs for the server
  * @param {Object} cron 
@@ -13,6 +17,7 @@ exports.cronSetup = (db)=>{
     cronUpcomingReservations(db,Op)
     cronSurveyReminder(db,Op)
     cronReservationStateChange(db,Op)
+    setMonthlyStatisticsNewsLetter(db)
 }
   //po zakończeniu pracy serwera wszystkie cron-job'y znikają
       //ustawienie cron-jobów po restarcie serwera
@@ -71,8 +76,38 @@ exports.newCronAction = (db,Op,eventEndDate,eventId) => {
     })
 }
   
-const setMonthlyStatisticsNewsLetter = () =>{
-  cron.schedule(`0 22 1 1-12 *`,()=>{
-
+const setMonthlyStatisticsNewsLetter = (db) =>{
+  cron.schedule(`0 22 1 1-12 *`, async ()=>{
+    const departmentIDs = await db.Department.findAll({attributes:['id','name']})
+    if(!departmentIDs){
+      logger.error({message: 'Problem ze znalezieniem departamentów', method: 'setMonthlyStatisticsNewsLetter'})
+    }
+    const departmentIDsLength = departmentIDs.length
+    const currentMonthName = new Date().toLocaleDateString('default', { month: 'long' })
+    let attachments = []
+    for(let i =0 ; i<departmentIDsLength;i++){
+      const doc  = await departmentStatistics(departmentIDs[i].id)
+      doc.end()
+      attachments.push({
+        filename:`statystyki_${currentMonthName}_${departmentIDs.name}.pdf`,
+        type: "application/pdf",
+        content:doc      
+      })
+    }
+    const facultyHead = await db.FacultyAuthoritie.findOne({
+      where:{type:'dean'},
+      include:
+        {
+          model:db.Employee, 
+          include: db.User
+        }
+    }) 
+    
+    sendMessage(
+      facultyHead.Employee.User.email,
+      'Miesięczne statystyki użycia aparatury',
+      'w załączniku są zawartestastyki w postaci plików pdf',
+      null,
+      attachments)
   })
 }

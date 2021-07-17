@@ -3,17 +3,17 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class FacultyAuthorities extends Model {
+  class FacultyAuthoritie extends Model {
 
     static associate(models) {
-      FacultyAuthorities.belongsTo(models.Employee,{foreignKey:'employeeId'})
+      FacultyAuthoritie.belongsTo(models.Employee,{foreignKey:'employeeId'})
     }
   };
-  FacultyAuthorities.init({
+  FacultyAuthoritie.init({
     type: DataTypes.ENUM('deputy_dean','dean'),
   }, {
     sequelize,
-    modelName: 'FacultyAuthorities',
+    modelName: 'FacultyAuthoritie',
   });
-  return FacultyAuthorities;
+  return FacultyAuthoritie;
 };
